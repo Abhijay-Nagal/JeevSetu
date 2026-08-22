@@ -1,5 +1,33 @@
 import React, { useState } from "react";
+import {
+  Search,
+  Compass,
+  Brain,
+  Loader2,
+  BookOpen,
+  Globe2,
+  Gamepad2,
+  PenSquare,
+  Megaphone,
+  Handshake,
+  CheckCircle2,
+  ExternalLink,
+} from "lucide-react";
 import { searchBNHS, getNextSteps, getQuiz } from "./ragApi";
+
+const TABS = [
+  { key: "search", label: "Content Search", icon: Search, placeholder: "Search: 'vulture conservation', 'birds in wetlands'..." },
+  { key: "next-steps", label: "Next Steps", icon: Compass, placeholder: "Enter a topic to get actionable next steps..." },
+  { key: "quiz", label: "Quiz", icon: Brain, placeholder: "Enter a topic to generate a quiz..." },
+];
+
+const ACTION_ICONS = {
+  Learn: BookOpen,
+  Explore: Globe2,
+  Play: Gamepad2,
+  "Take a quiz": PenSquare,
+  Advocate: Megaphone,
+};
 
 export default function RAGPage() {
   const [activeTab, setActiveTab] = useState("search");
@@ -7,6 +35,8 @@ export default function RAGPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState("");
+
+  const currentTab = TABS.find((tab) => tab.key === activeTab);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -32,106 +62,99 @@ export default function RAGPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 font-sans">
-      <div className="w-full max-w-4xl bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-        
+    <div className="min-h-screen bg-[#F8F6E9] flex flex-col items-center py-10 px-4 font-sans text-[#0B3D2E]">
+      <div className="w-full max-w-4xl bg-white rounded-2xl overflow-hidden border border-[#0B3D2E]/10 shadow-sm">
+
         {/* Header */}
-        <div className="bg-emerald-700 text-white p-8 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                   <pattern id="leaf" width="40" height="40" patternUnits="userSpaceOnUse">
-                      <path d="M20 0C20 11 11 20 0 20C11 20 20 29 20 40C20 29 29 20 40 20C29 20 20 11 20 0Z" fill="currentColor" />
-                   </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#leaf)" />
-             </svg>
-          </div>
-          <h1 className="text-4xl font-bold mb-2 relative z-10">BNHS Knowledge Hub</h1>
-          <p className="text-emerald-100 text-lg relative z-10">Powered by Gemini AI & pgvector Search</p>
+        <div className="bg-[#0B3D2E] text-[#F8F6E9] px-8 py-7">
+          <h1 className="text-3xl font-bold tracking-tight">BNHS Knowledge Hub</h1>
+          <p className="text-[#F8F6E9]/70 mt-1">Search, learn, and test your knowledge of Indian wildlife</p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-gray-200">
-          <button 
-            onClick={() => { setActiveTab("search"); setResults(null); }}
-            className={`flex-1 py-4 text-center font-semibold transition-colors duration-200 ${activeTab === 'search' ? 'text-emerald-700 border-b-2 border-emerald-700 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600 hover:bg-gray-50'}`}
-          >
-            🔍 Content Search
-          </button>
-          <button 
-            onClick={() => { setActiveTab("next-steps"); setResults(null); }}
-            className={`flex-1 py-4 text-center font-semibold transition-colors duration-200 ${activeTab === 'next-steps' ? 'text-emerald-700 border-b-2 border-emerald-700 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600 hover:bg-gray-50'}`}
-          >
-            🚀 Next Steps
-          </button>
-          <button 
-            onClick={() => { setActiveTab("quiz"); setResults(null); }}
-            className={`flex-1 py-4 text-center font-semibold transition-colors duration-200 ${activeTab === 'quiz' ? 'text-emerald-700 border-b-2 border-emerald-700 bg-emerald-50' : 'text-gray-500 hover:text-emerald-600 hover:bg-gray-50'}`}
-          >
-            🧠 AI Quizzes
-          </button>
+        <div className="flex gap-1 bg-[#0B3D2E]/5 p-2">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); }}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[#F4C430] text-[#0B3D2E]"
+                    : "text-[#0B3D2E]/60 hover:bg-[#0B3D2E]/10 hover:text-[#0B3D2E]"
+                }`}
+              >
+                <Icon size={17} />
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Main Content Area */}
         <div className="p-8">
-          
-          <form onSubmit={handleSearch} className="mb-8 relative">
-            <input 
-              type="text" 
+
+          <form onSubmit={handleSearch} className="mb-8 flex gap-3">
+            <input
+              type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                activeTab === "search" ? "Semantic Search: 'vulture conservation', 'birds in wetlands'..." :
-                activeTab === "next-steps" ? "Enter a topic to generate LLM actionable steps..." :
-                "Enter a topic to generate an LLM Quiz..."
-              }
-              className="w-full pl-6 pr-32 py-4 rounded-full bg-gray-100 border-transparent focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none text-lg transition-all shadow-sm"
+              placeholder={currentTab.placeholder}
+              className="flex-1 px-5 py-3 rounded-xl bg-[#F8F6E9] border border-[#0B3D2E]/15 focus:bg-white focus:border-[#F4C430] focus:ring-2 focus:ring-[#F4C430]/30 outline-none text-base transition-all"
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={loading || !query.trim()}
-              className="absolute right-2 top-2 bottom-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 rounded-full font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
+              className="bg-[#F4C430] hover:bg-[#e0b422] text-[#0B3D2E] px-6 rounded-xl font-semibold transition-colors disabled:bg-[#0B3D2E]/10 disabled:text-[#0B3D2E]/40 disabled:cursor-not-allowed flex items-center justify-center min-w-[110px]"
             >
-              {loading ? (
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              ) : "Search"}
+              {loading ? <Loader2 size={18} className="animate-spin" /> : "Search"}
             </button>
           </form>
 
           {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6 border border-red-100">
+            <div className="bg-red-50 text-red-700 p-4 rounded-xl mb-6 border border-red-100">
               {error}
             </div>
           )}
 
           {/* Results Container */}
           <div className="space-y-6">
-            
+
             {/* SEARCH RESULTS */}
             {activeTab === "search" && results && (
-              results.length === 0 ? <p className="text-gray-500 text-center py-10">No results found.</p> :
-              <div className="grid gap-6">
-                <h3 className="text-xl font-bold text-gray-800 border-b pb-2">Vector Search Results</h3>
+              results.length === 0 ? <p className="text-[#0B3D2E]/50 text-center py-10">No results found.</p> :
+              <div className="grid gap-4">
+                <h3 className="text-lg font-bold border-b border-[#0B3D2E]/10 pb-2">Search results</h3>
                 {results.map((item, idx) => (
-                  <a key={idx} href={item.bnhs_url || "#"} target="_blank" rel="noreferrer" className="group flex flex-col md:flex-row bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all overflow-hidden relative">
+                  <a
+                    key={idx}
+                    href={item.bnhs_url || "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex flex-col md:flex-row bg-white rounded-xl border border-[#0B3D2E]/10 hover:border-[#F4C430] hover:shadow-md transition-all overflow-hidden relative"
+                  >
                     {item.similarity_score !== undefined && item.similarity_score !== null && (
-                      <div className="absolute top-2 right-2 bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded-full z-10 shadow-sm border border-emerald-200">
-                        {Math.round(item.similarity_score * 100)}% Match
+                      <div className="absolute top-3 right-3 bg-[#81C784]/20 text-[#0B3D2E] text-xs font-bold px-2 py-1 rounded-full z-10">
+                        {Math.round(item.similarity_score * 100)}% match
                       </div>
                     )}
                     {item.image_url && (
-                      <div className="md:w-48 h-48 md:h-auto bg-gray-100 shrink-0">
+                      <div className="md:w-48 h-48 md:h-auto bg-[#F8F6E9] shrink-0">
                         <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                     )}
                     <div className="p-6 flex-1 flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">{item.content_type || 'Resource'}</span>
-                        <span className="text-xs text-gray-400">{item.source || 'BNHS'}</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D32] bg-[#81C784]/15 px-2 py-1 rounded-md">{item.content_type || "Resource"}</span>
+                        <span className="text-xs text-[#0B3D2E]/40">{item.source || "BNHS"}</span>
                       </div>
-                      <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors">{item.title}</h4>
-                      <p className="text-gray-600 line-clamp-2">{item.summary}</p>
+                      <h4 className="text-lg font-bold mb-2 group-hover:text-[#2E7D32] transition-colors flex items-center gap-2">
+                        {item.title}
+                        <ExternalLink size={14} className="opacity-0 group-hover:opacity-60 transition-opacity" />
+                      </h4>
+                      <p className="text-[#0B3D2E]/60 line-clamp-2">{item.summary}</p>
                     </div>
                   </a>
                 ))}
@@ -140,55 +163,67 @@ export default function RAGPage() {
 
             {/* NEXT STEPS RESULTS */}
             {activeTab === "next-steps" && results && (
-              results.length === 0 ? <p className="text-gray-500 text-center py-10">No recommended actions found for this topic.</p> :
+              results.length === 0 ? <p className="text-[#0B3D2E]/50 text-center py-10">No recommended actions found for this topic.</p> :
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-6 border-b pb-2">AI Generated Actions</h3>
+                <h3 className="text-lg font-bold mb-4 border-b border-[#0B3D2E]/10 pb-2">Recommended actions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {results.map((action, idx) => (
-                    <a 
-                      key={idx} 
-                      href={action.direct_link || "#"} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="flex items-center p-5 rounded-xl border border-gray-200 hover:border-emerald-500 hover:shadow-md transition-all group bg-white"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl font-bold mr-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                        {action.action_label === 'Learn' ? '📚' : action.action_label === 'Explore' ? '🌍' : action.action_label === 'Play' ? '🎮' : action.action_label === 'Take a quiz' ? '📝' : action.action_label === 'Advocate' ? '📢' : '🤝'}
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-emerald-600 uppercase tracking-wide">{action.action_label}</div>
-                        <div className="text-gray-800 font-medium">{action.description}</div>
-                      </div>
-                    </a>
-                  ))}
+                  {results.map((action, idx) => {
+                    const Icon = ACTION_ICONS[action.action_label] || Handshake;
+                    return (
+                      <a
+                        key={idx}
+                        href={action.direct_link || "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center p-5 rounded-xl border border-[#0B3D2E]/10 hover:border-[#F4C430] hover:shadow-md transition-all group bg-white"
+                      >
+                        <div className="w-11 h-11 shrink-0 rounded-full bg-[#81C784]/20 text-[#2E7D32] flex items-center justify-center mr-4 group-hover:bg-[#F4C430] group-hover:text-[#0B3D2E] transition-colors">
+                          <Icon size={20} />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-[#2E7D32] uppercase tracking-wide">{action.action_label}</div>
+                          <div className="text-[#0B3D2E] font-medium">{action.description}</div>
+                        </div>
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* QUIZ RESULTS */}
             {activeTab === "quiz" && results && (
-              results.length === 0 ? <p className="text-gray-500 text-center py-10">No quiz questions generated for this topic yet.</p> :
-              <div className="space-y-8">
-                <h3 className="text-xl font-bold text-gray-800 border-b pb-2">AI Generated Knowledge Test</h3>
+              results.length === 0 ? <p className="text-[#0B3D2E]/50 text-center py-10">No quiz questions generated for this topic yet.</p> :
+              <div className="space-y-6">
+                <h3 className="text-lg font-bold border-b border-[#0B3D2E]/10 pb-2">Knowledge check</h3>
                 {results.map((q, qIdx) => (
-                  <div key={qIdx} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative group overflow-hidden">
-                    <h4 className="text-lg font-bold text-gray-800 mb-4">{qIdx + 1}. {q.question}</h4>
-                    <div className="space-y-3 relative z-10">
+                  <div key={qIdx} className="bg-white rounded-xl border border-[#0B3D2E]/10 p-6 relative group overflow-hidden">
+                    <h4 className="text-base font-bold mb-4">{qIdx + 1}. {q.question}</h4>
+                    <div className="space-y-2.5 relative z-10">
                       {q.options.map((opt, oIdx) => (
-                        <div key={oIdx} className={`p-4 rounded-lg border transition-colors ${oIdx === q.correct_answer ? 'bg-emerald-50 border-emerald-200 opacity-0 group-hover:opacity-100' : 'bg-gray-50 border-gray-200'}`}>
-                          <span className="font-bold text-gray-500 mr-3">{String.fromCharCode(65 + oIdx)}</span> {opt}
-                          {oIdx === q.correct_answer && <span className="ml-2 text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">✓ Correct</span>}
+                        <div
+                          key={oIdx}
+                          className={`flex items-center gap-3 p-3.5 rounded-lg border text-sm transition-colors ${
+                            oIdx === q.correct_answer
+                              ? "bg-[#81C784]/15 border-[#81C784]/40"
+                              : "bg-[#F8F6E9] border-[#0B3D2E]/10"
+                          }`}
+                        >
+                          <span className="font-bold text-[#0B3D2E]/40">{String.fromCharCode(65 + oIdx)}</span>
+                          <span className="flex-1">{opt}</span>
+                          {oIdx === q.correct_answer && <CheckCircle2 size={16} className="text-[#2E7D32]" />}
                         </div>
                       ))}
                     </div>
+
                     {/* Hover to reveal answer overlay */}
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
-                       <span className="bg-emerald-600 text-white px-6 py-3 rounded-full font-bold shadow-lg">Hover to reveal answer</span>
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                      <span className="bg-[#0B3D2E] text-[#F8F6E9] px-5 py-2.5 rounded-full font-semibold text-sm">Hover to reveal answer</span>
                     </div>
-                    
-                    <div className="mt-6 pt-4 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative z-10">
-                      <p className="text-gray-600 text-sm"><strong className="text-gray-800">Explanation:</strong> {q.explanation}</p>
-                      {q.source_reference && <p className="text-xs text-gray-400 mt-2">Source: {q.source_reference}</p>}
+
+                    <div className="mt-5 pt-4 border-t border-[#0B3D2E]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative z-10">
+                      <p className="text-sm text-[#0B3D2E]/70"><strong className="text-[#0B3D2E]">Explanation:</strong> {q.explanation}</p>
+                      {q.source_reference && <p className="text-xs text-[#0B3D2E]/40 mt-2">Source: {q.source_reference}</p>}
                     </div>
                   </div>
                 ))}
