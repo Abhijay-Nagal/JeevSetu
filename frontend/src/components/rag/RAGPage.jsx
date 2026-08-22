@@ -16,7 +16,7 @@ import {
   User,
   FileText,
 } from "lucide-react";
-import { searchBNHS, getNextSteps, getQuiz } from "./ragApi";
+import { api } from "../../lib/api";
 
 const TABS = [
   { key: "search", label: "Content Search", icon: Search, placeholder: "Search: 'vulture conservation', 'birds in wetlands'..." },
@@ -50,14 +50,14 @@ export default function RAGPage() {
     setQuizAnswers({});
     try {
       if (activeTab === "search") {
-        const data = await searchBNHS(query);
+        const data = await api.searchKnowledgeHub(query);
         setResults(data.results || []);
       } else if (activeTab === "next-steps") {
         const dummyResource = { title: query, content: "User requested action steps for this topic.", type: "General Topic" };
-        const data = await getNextSteps(dummyResource);
+        const data = await api.getNextSteps(dummyResource);
         setResults(data.actions || []);
       } else if (activeTab === "quiz") {
-        const data = await getQuiz(query);
+        const data = await api.getQuiz(query);
         setResults(data.questions || []);
       }
     } catch (err) {
@@ -67,39 +67,38 @@ export default function RAGPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6E9] flex flex-col items-center py-10 px-4 font-sans text-[#0B3D2E]">
-      <div className="w-full max-w-4xl bg-white rounded-2xl overflow-hidden border border-[#0B3D2E]/10 shadow-sm">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl overflow-hidden border border-[#0B3D2E]/10 shadow-sm">
 
-        {/* Header */}
-        <div className="bg-[#0B3D2E] text-[#F8F6E9] px-8 py-7">
-          <h1 className="text-3xl font-bold tracking-tight">BNHS Knowledge Hub</h1>
-          <p className="text-[#F8F6E9]/70 mt-1">Search, learn, and test your knowledge of Indian wildlife</p>
-        </div>
+      {/* Header */}
+      <div className="bg-[#0B3D2E] text-[#F8F6E9] px-8 py-7">
+        <h1 className="text-3xl font-bold tracking-tight">BNHS Knowledge Hub</h1>
+        <p className="text-[#F8F6E9]/70 mt-1">Search, learn, and test your knowledge of Indian wildlife</p>
+      </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex gap-1 bg-[#0B3D2E]/5 p-2">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); setQuizAnswers({}); }}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
-                  isActive
-                    ? "bg-[#F4C430] text-[#0B3D2E]"
-                    : "text-[#0B3D2E]/60 hover:bg-[#0B3D2E]/10 hover:text-[#0B3D2E]"
-                }`}
-              >
-                <Icon size={17} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Navigation Tabs */}
+      <div className="flex gap-1 bg-[#0B3D2E]/5 p-2">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); setQuizAnswers({}); }}
+              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
+                isActive
+                  ? "bg-[#F4C430] text-[#0B3D2E]"
+                  : "text-[#0B3D2E]/60 hover:bg-[#0B3D2E]/10 hover:text-[#0B3D2E]"
+              }`}
+            >
+              <Icon size={17} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Main Content Area */}
-        <div className="p-8">
+      {/* Main Content Area */}
+      <div className="p-8">
 
           <form onSubmit={handleSearch} className="mb-8 flex gap-3">
             <input
@@ -263,7 +262,6 @@ export default function RAGPage() {
             )}
           </div>
 
-        </div>
       </div>
     </div>
   );
