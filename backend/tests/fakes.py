@@ -142,9 +142,17 @@ class FakeSupabaseClient:
             }
         ).execute()
 
-        for row in self._get_table("users").rows:
+        users_table = self._get_table("users")
+        for row in users_table.rows:
             if row.get("id") == p_user_id:
                 row["coin_balance"] = row.get("coin_balance", 0) + p_amount
+                return
+
+        # Real Postgres always has a users row for an authenticated caller
+        # (the signup trigger creates it) -- test fixtures often use ad-hoc
+        # ids like "user-1" without bothering to seed one, so self-heal here
+        # instead of requiring every fixture to pre-create a users row.
+        users_table.rows.append({"id": p_user_id, "coin_balance": p_amount})
 
     def _get_table(self, name: str) -> FakeTable:
         if name not in self._tables:

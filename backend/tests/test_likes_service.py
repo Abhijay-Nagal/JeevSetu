@@ -1,7 +1,7 @@
 import pytest
 
 from app.models.schema import ObservationCreate
-from app.services import likes, observations
+from app.services import likes, observations, rewards
 from tests.fakes import FakeSupabaseClient
 
 
@@ -53,3 +53,33 @@ def test_two_users_liking_counts_both(fake_supabase, observation):
     result = likes.like_observation(fake_supabase, observation["id"], "user-2")
 
     assert result["like_count"] == 2
+
+
+def test_liking_a_post_awards_coins_to_the_author(fake_supabase, observation):
+    # `observation` already earned the author COINS_POST_CREATED via the
+    # create_observation hook -- assert the delta the like itself causes.
+    balance_before = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+
+    likes.like_observation(fake_supabase, observation["id"], "user-1")
+
+    balance_after = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+    assert balance_after - balance_before == rewards.COINS_POST_LIKED
+
+
+def test_liking_your_own_post_awards_no_coins(fake_supabase, observation):
+    balance_before = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+
+    likes.like_observation(fake_supabase, observation["id"], "author")
+
+    balance_after = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+    assert balance_after == balance_before
+
+
+def test_liking_twice_only_awards_coins_once(fake_supabase, observation):
+    balance_before = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+
+    likes.like_observation(fake_supabase, observation["id"], "user-1")
+    likes.like_observation(fake_supabase, observation["id"], "user-1")
+
+    balance_after = rewards.get_wallet(fake_supabase, "author")["coin_balance"]
+    assert balance_after - balance_before == rewards.COINS_POST_LIKED

@@ -2,7 +2,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.models.schema import CommunityCreate, ObservationCreate, ObservationStatusUpdate
-from app.services import communities, observations
+from app.services import communities, observations, rewards
 from tests.fakes import FakeSupabaseClient
 
 
@@ -21,6 +21,13 @@ def test_create_observation_sets_user_id(fake_supabase):
     assert result["user_id"] == "user-1"
     assert result["species"] == "Cheetah"
     assert result["status"] == "submitted"
+
+
+def test_create_observation_awards_coins_to_the_author(fake_supabase):
+    observations.create_observation(fake_supabase, "user-1", ObservationCreate(species="Cheetah"))
+
+    wallet = rewards.get_wallet(fake_supabase, "user-1")
+    assert wallet["coin_balance"] == rewards.COINS_POST_CREATED
 
 
 def test_list_own_observations_excludes_others(fake_supabase):
