@@ -1,22 +1,52 @@
 import React, { useRef } from "react";
 import HTMLFlipBook from "react-pageflip";
 import { Link, Navigate } from "react-router-dom";
-import { Leaf, Users, MessageCircle, FileText, Globe } from "lucide-react";
+import { Leaf, Users, MessageCircle, FileText, Globe, Search, ArrowRight, BookOpen, Camera, Shield } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import ShinyText from "../components/ui/ShinyText";
+import SplitText from "../components/ui/SplitText";
 
 export const route = { path: "/" };
 
 const Page = React.forwardRef((props, ref) => {
   return (
     <div 
-      className="page bg-[#F8F6E9] shadow-[inset_0_0_20px_rgba(0,0,0,0.08)] border-r border-[#0B3D2E]/10 flex flex-col justify-center items-center text-center p-8 overflow-hidden relative" 
+      className={`page shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] border-r border-black/30 p-6 overflow-hidden relative ${props.imagePage ? 'bg-black' : 'bg-[#0B3D2E] text-[#F8F6E9]'}`} 
       ref={ref}
     >
-      <div className="h-full w-full flex flex-col justify-center">
-        {props.children}
-      </div>
-      {props.number && (
-        <div className="absolute bottom-4 right-4 text-xs font-semibold opacity-40">
+      {/* Left click zone for previous page */}
+      <div 
+        className="absolute left-0 top-16 bottom-16 w-1/3 z-20 cursor-pointer" 
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          if (props.bookRef?.current?.pageFlip()) {
+             props.bookRef.current.pageFlip().flipPrev();
+          }
+        }} 
+      />
+      {/* Right click zone for next page */}
+      <div 
+        className="absolute right-0 top-16 bottom-16 w-1/3 z-20 cursor-pointer" 
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          if (props.bookRef?.current?.pageFlip()) {
+             props.bookRef.current.pageFlip().flipNext();
+          }
+        }} 
+      />
+
+      {props.imagePage ? (
+        <div className="absolute inset-0 w-full h-full pointer-events-none">
+          <img src={props.imageSrc} alt="Illustration" className="w-full h-full object-cover opacity-90" />
+        </div>
+      ) : (
+        <div className="h-full w-full relative z-30 pointer-events-auto flex flex-col">
+          {props.children}
+        </div>
+      )}
+      
+      {props.number && !props.imagePage && (
+        <div className="absolute bottom-4 right-4 text-xs font-semibold opacity-40 pointer-events-none">
           {props.number}
         </div>
       )}
@@ -31,154 +61,289 @@ export default function Home() {
   if (loading) return null;
   if (user) return <Navigate to="/home" replace />;
 
+  const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B3D2E] py-12 text-[#0B3D2E] overflow-hidden">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B3D2E] py-12 text-[#0B3D2E] overflow-y-auto">
       <div className="w-full max-w-5xl flex justify-between px-8 pb-8 text-[#F8F6E9] items-center absolute top-6">
          <img src="/jeevsetu-logo.png" className="h-8 brightness-0 invert" alt="JeevSetu" />
-         <div className="flex gap-6">
+         <div className="flex gap-6 z-50 relative pointer-events-auto">
            <Link to="/login" className="hover:underline font-medium text-sm">Log In</Link>
            <Link to="/signup" className="hover:underline font-medium text-sm">Sign Up</Link>
          </div>
       </div>
       
-      <div className="mt-12 md:mt-16 z-10 perspective-1000">
+      <div className="z-10 perspective-1000 mt-12 w-full max-w-[800px] h-[520px] flex justify-center items-center shrink-0">
         <HTMLFlipBook 
-          width={400} 
-          height={550} 
-          size="stretch"
-          minWidth={300}
-          maxWidth={450}
-          minHeight={450}
-          maxHeight={650}
+          width={360} 
+          height={500} 
           showCover={true}
           className="mx-auto shadow-2xl drop-shadow-2xl book-container"
           ref={bookRef}
           useMouseEvents={true}
         >
-          {/* Page 1 - Cover */}
-          <Page>
-            <div className="flex flex-col justify-between h-full py-4">
-              <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-32 h-auto mx-auto mb-6" />
-              <div>
-                <h1 className="text-3xl font-bold mb-4 text-[#0B3D2E] px-4 leading-tight">Protect Wildlife. <br/>Empower Communities.</h1>
-                <p className="text-sm opacity-80 mb-10 px-4 text-center">
-                  A community-driven platform connecting people, conservation efforts, and wildlife to create a safer future for all.
+          {/* Page 1 - Cover (Welcome to JeevSetu) */}
+          <Page bookRef={bookRef}>
+            <div className="flex flex-col h-full py-2">
+              <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-20 h-auto mx-auto mb-4 brightness-0 invert shrink-0" />
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col w-full text-center">
+                <h1 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight">
+                  <SplitText text="Bridging People & Wildlife" />
+                </h1>
+                <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
+                  India is home to extraordinary biodiversity — from Himalayan forests to coastal wetlands, grasslands, deserts and urban ecosystems.
+                </p>
+                <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
+                  But protecting this natural heritage isn't the responsibility of scientists and conservationists alone.
+                </p>
+                <p className="text-sm font-semibold mb-3 px-2 text-[#F4C430]">
+                  JeevSetu connects you to the people, knowledge and opportunities that help protect it.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 px-8 mt-auto">
-                <button 
-                  onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }} 
-                  className="rounded-full bg-[#0B3D2E] py-2.5 text-white font-medium hover:bg-[#0B3D2E]/90 transition"
-                >
-                  Explore Features
-                </button>
+              <button 
+                onClick={next} 
+                className="mt-4 mx-auto flex items-center gap-2 rounded-full bg-[#F4C430] px-6 py-2.5 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg shrink-0"
+              >
+                Begin the Journey <ArrowRight size={18} />
+              </button>
+            </div>
+          </Page>
+
+          {/* Page 2 - Left Illustration (BNHS) */}
+          <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />
+
+          {/* Page 3 - Who is BNHS? */}
+          <Page number="1" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="Meet BNHS" /></h2>
+              <div className="overflow-y-auto no-scrollbar flex-1 pb-4">
+                <p className="text-sm opacity-90 leading-relaxed mb-4">
+                  The Bombay Natural History Society (BNHS) is one of India's oldest organisations dedicated to nature conservation, founded in 1883.
+                </p>
+                <p className="text-sm opacity-90 leading-relaxed mb-4">
+                  For more than a century, BNHS has worked to understand and protect India's biodiversity through scientific research, conservation, education and public awareness.
+                </p>
+                <div className="bg-white/10 p-4 rounded-xl text-xs space-y-3">
+                  <div className="flex gap-2"><b>1883</b> <span className="opacity-70">→ Founded in Mumbai</span></div>
+                  <div className="flex gap-2"><b>Research</b> <span className="opacity-70">→ Understanding India's wildlife</span></div>
+                  <div className="flex gap-2"><b>Conservation</b> <span className="opacity-70">→ Protecting threatened species</span></div>
+                  <div className="flex gap-2"><b>Education</b> <span className="opacity-70">→ Helping people understand nature</span></div>
+                  <div className="flex gap-2"><b>Community</b> <span className="opacity-70">→ Bringing people into conservation</span></div>
+                </div>
               </div>
             </div>
           </Page>
 
-          {/* Page 2 */}
-          <Page>
-            <Leaf className="mx-auto text-[#0B3D2E] mb-6" size={48} strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold mb-6 text-[#0B3D2E]">Welcome to JeevSetu</h2>
-            <p className="text-sm opacity-80 leading-relaxed px-6 text-center">
-              JeevSetu brings people together to understand, report, and take meaningful action for wildlife conservation. Whether you're sharing an observation, seeking guidance, or supporting a local initiative, every contribution helps.
-            </p>
-          </Page>
+          {/* Page 4 - Left Illustration (Research) */}
+          <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />
 
-          {/* Page 3 */}
-          <Page number="1">
-            <Users className="mx-auto text-[#0B3D2E] mb-6" size={48} strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold mb-6 text-[#0B3D2E]">Explore Community</h2>
-            <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
-              Connect, share, and discover wildlife conservation initiatives and stories from your community.
-            </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
-              className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
-            >
-              Next
-            </button>
-          </Page>
-
-          {/* Page 4 */}
-          <Page number="2">
-            <MessageCircle className="mx-auto text-[#0B3D2E] mb-6" size={48} strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold mb-6 text-[#0B3D2E]">JeevSetu Chatbot</h2>
-            <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
-              Have a question about wildlife? Get quick guidance on wildlife, conservation, and responsible action.
-            </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
-              className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
-            >
-              Next
-            </button>
-          </Page>
-
-          {/* Page 5 */}
-          <Page number="3">
-            <FileText className="mx-auto text-[#0B3D2E] mb-6" size={48} strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold mb-6 text-[#0B3D2E]">My Submissions</h2>
-            <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
-              Track the observations, reports, and contributions you've shared with the community.
-            </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
-              className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
-            >
-              Next
-            </button>
-          </Page>
-
-          {/* Page 6 */}
-          <Page number="4">
-            <Globe className="mx-auto text-[#0B3D2E] mb-8" size={48} strokeWidth={1.5} />
-            <h2 className="text-2xl font-bold mb-10 text-[#0B3D2E]">Every Action Counts</h2>
-            <div className="flex flex-col gap-6 text-center px-8 mx-auto w-full max-w-[240px]">
-              <div>
-                <div className="font-bold text-2xl text-[#0B3D2E] tracking-tight">1,240+</div>
-                <div className="text-xs font-medium uppercase tracking-wider opacity-60 mt-1">Community Members</div>
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-[#0B3D2E] tracking-tight">386</div>
-                <div className="text-xs font-medium uppercase tracking-wider opacity-60 mt-1">Wildlife Reports</div>
-              </div>
-              <div>
-                <div className="font-bold text-2xl text-[#0B3D2E] tracking-tight">72</div>
-                <div className="text-xs font-medium uppercase tracking-wider opacity-60 mt-1">Conservation Initiatives</div>
+          {/* Page 5 - What Does BNHS Actually Do? */}
+          <Page number="2" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="From Research to Conservation" /></h2>
+              <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pb-2 pr-1">
+                <div className="flex gap-3">
+                  <div className="bg-white/10 p-2 rounded-lg h-fit text-xl">🔬</div>
+                  <div>
+                    <h3 className="font-bold text-sm">Research</h3>
+                    <p className="text-xs opacity-70 leading-relaxed">Scientists study species, ecosystems and environmental threats to understand what needs protection.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="bg-white/10 p-2 rounded-lg h-fit text-xl">🦅</div>
+                  <div>
+                    <h3 className="font-bold text-sm">Species Conservation</h3>
+                    <p className="text-xs opacity-70 leading-relaxed">BNHS works on threatened species and habitats across India, including birds, mammals, reptiles and marine ecosystems.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="bg-white/10 p-2 rounded-lg h-fit text-xl">🌱</div>
+                  <div>
+                    <h3 className="font-bold text-sm">Habitat Conservation</h3>
+                    <p className="text-xs opacity-70 leading-relaxed">Conservation begins with understanding the places wildlife depends on, from wetlands to grasslands.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="bg-white/10 p-2 rounded-lg h-fit text-xl">📚</div>
+                  <div>
+                    <h3 className="font-bold text-sm">Education & Awareness</h3>
+                    <p className="text-xs opacity-70 leading-relaxed">BNHS runs conservation education programmes, nature trails and courses.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </Page>
 
-          {/* Page 7 */}
-          <Page number="5">
-            <div className="flex flex-col h-full justify-center pb-8 pt-6">
-              <div>
-                <h2 className="text-3xl font-bold mb-8 px-4 text-[#0B3D2E] leading-tight">Together, We Can Make a Difference</h2>
-                <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-12">
-                  Wildlife conservation begins when communities come together. Every observation, every report, and every action can help protect the wild.
+          {/* Page 6 - Left Illustration (Volunteer) */}
+          <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />
+
+          {/* Page 7 - Conservation Isn't Just About Scientists */}
+          <Page number="3" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-2xl font-bold mb-4 text-[#F8F6E9] leading-tight">You Can Be Part of <br/><ShinyText text="Conservation" /></h2>
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
+                <p className="text-sm opacity-90 leading-relaxed mb-4">
+                  You don't need to be a wildlife scientist to contribute.
                 </p>
+                <p className="text-sm opacity-90 leading-relaxed mb-6">
+                  Conservation needs observers, volunteers, students, educators, photographers, communities and people who simply care about nature.
+                </p>
+                <div className="flex flex-col items-center justify-center gap-2 text-[#0B3D2E] font-medium text-sm bg-[#F4C430] p-4 rounded-xl border border-[#F4C430]/30 mt-auto shadow-inner text-center">
+                  <div>Observe</div>
+                  <div className="text-[#0B3D2E]/40">↓</div>
+                  <div>Learn</div>
+                  <div className="text-[#0B3D2E]/40">↓</div>
+                  <div>Report</div>
+                  <div className="text-[#0B3D2E]/40">↓</div>
+                  <div>Participate</div>
+                  <div className="text-[#0B3D2E]/40">↓</div>
+                  <div className="font-bold">Protect</div>
+                </div>
               </div>
-              <div className="flex justify-center mt-auto">
-                <Link to="/signup" className="rounded-full bg-[#F4C430] px-10 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg text-lg">
-                  Get Started
+            </div>
+          </Page>
+
+          {/* Page 8 - Left Illustration (Citizen Science) */}
+          <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />
+
+          {/* Page 9 - Find Your Way to Contribute */}
+          <Page number="4" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="How Can You Contribute?" /></h2>
+              <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pb-2 pr-1">
+                <div className="bg-white/10 p-3 rounded-xl border border-white/5">
+                  <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🐦 Citizen Science</h3>
+                  <p className="text-xs opacity-70 leading-relaxed mb-2">Help collect observations and biodiversity data that can contribute to conservation research.</p>
+                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Citizen Science →</Link>
+                </div>
+                <div className="bg-white/10 p-3 rounded-xl border border-white/5">
+                  <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🌿 Volunteer</h3>
+                  <p className="text-xs opacity-70 leading-relaxed mb-2">Give your time and skills to conservation programmes, education and outreach.</p>
+                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Find Opportunities →</Link>
+                </div>
+                <div className="bg-white/10 p-3 rounded-xl border border-white/5">
+                  <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🎓 Learn</h3>
+                  <p className="text-xs opacity-70 leading-relaxed mb-2">Join nature trails, workshops and courses to build your understanding of biodiversity.</p>
+                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Learning →</Link>
+                </div>
+              </div>
+            </div>
+          </Page>
+
+          {/* Page 10 - Left Illustration (Community) */}
+          <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />
+
+          {/* Page 11 - Meet the Community */}
+          <Page number="5" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
+                <p className="text-sm opacity-90 leading-relaxed mb-4">
+                  Wildlife doesn't exist in isolation — and neither does conservation.
+                </p>
+                <p className="text-sm opacity-90 leading-relaxed mb-6">
+                  Connect with people who share your interests, exchange knowledge, discover local initiatives and take action together.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🌳 Urban Biodiversity</span>
+                  <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🐦 Birdwatchers of India</span>
+                  <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🐘 Wildlife Conservation</span>
+                  <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🌊 Marine Conservation</span>
+                </div>
+                <Link to="/signup" className="mt-auto flex justify-center items-center gap-2 w-full rounded-xl bg-[#F4C430] border border-[#F4C430]/20 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg shrink-0">
+                  Explore Communities <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
           </Page>
+
+          {/* Page 12 - Left Illustration (Action) */}
+          <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />
+
+          {/* Page 13 - From Interest to Action */}
+          <Page number="6" bookRef={bookRef}>
+            <div className="flex flex-col h-full">
+              <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="See Something? Do Something." /></h2>
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">🐦</span>
+                    <p className="text-sm opacity-90">You spot an injured bird.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">🌿</span>
+                    <p className="text-sm opacity-90">You discover a local biodiversity hotspot.</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg">🦌</span>
+                    <p className="text-sm opacity-90">You witness a wildlife concern.</p>
+                  </div>
+                </div>
+                <p className="font-bold text-sm mb-4">What happens next?</p>
+                <div className="text-[11px] font-bold opacity-70 tracking-wide uppercase mb-6 flex flex-wrap gap-2 text-center items-center justify-center">
+                  Observe → Verify → Submit → Connect → Act
+                </div>
+                <div className="bg-white/10 p-4 rounded-xl border border-white/5 mt-auto relative z-50 shrink-0">
+                  <h3 className="font-bold text-sm mb-1 text-[#F4C430]">My Submissions</h3>
+                  <p className="text-xs opacity-80 leading-relaxed mb-3">Keep track of the observations, reports and contributions you've made through JeevSetu.</p>
+                  <Link to="/signup" className="text-xs font-bold hover:underline flex items-center text-[#F4C430] w-fit">View My Submissions <ArrowRight size={12} className="ml-1" /></Link>
+                </div>
+              </div>
+            </div>
+          </Page>
+
+          {/* Page 14 - Left Illustration (Final) */}
+          <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />
+
+          {/* Page 15 - Your JeevSetu */}
+          <Page number="7" bookRef={bookRef}>
+            <div className="flex flex-col h-full py-2">
+              <h2 className="text-2xl font-bold mb-6 text-[#F8F6E9] leading-tight">
+                Your Connection to Wildlife <br/><ShinyText text="Starts Here." />
+              </h2>
+              
+              <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
+                <div className="text-sm opacity-90 leading-relaxed mb-6 space-y-1 font-medium italic">
+                  <p>Learn something.</p>
+                  <p>Meet someone.</p>
+                  <p>Notice something.</p>
+                  <p>Contribute something.</p>
+                </div>
+
+                <p className="text-sm font-semibold text-[#F4C430] mb-8 leading-relaxed">
+                  Every action can help build a stronger connection between people and the natural world.
+                </p>
+
+                <div className="flex flex-col gap-3 mb-6 relative z-50 shrink-0">
+                  <Link to="/signup" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
+                    <div className="bg-[#F4C430] text-[#0B3D2E] p-2 rounded-lg"><Users size={18} /></div>
+                    <span className="font-bold text-sm">Explore Communities</span>
+                  </Link>
+                  <Link to="/signup" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
+                    <div className="bg-[#F4C430] text-[#0B3D2E] p-2 rounded-lg"><MessageCircle size={18} /></div>
+                    <span className="font-bold text-sm">Ask JeevSetu</span>
+                  </Link>
+                </div>
+
+                <p className="text-[10px] font-semibold opacity-50 text-center mt-auto tracking-widest uppercase shrink-0">
+                  JeevSetu — Bridging People & Wildlife
+                </p>
+              </div>
+            </div>
+          </Page>
           
-          {/* Page 8 - Back Cover */}
-          <Page>
+          {/* Page 16 - Back Cover */}
+          <Page bookRef={bookRef}>
              <div className="flex flex-col items-center justify-center h-full opacity-30">
-               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-24 h-auto grayscale mb-4" />
+               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-24 h-auto brightness-0 invert mb-4" />
                <p className="text-xs font-semibold">© 2026 JeevSetu</p>
              </div>
           </Page>
         </HTMLFlipBook>
       </div>
       
-      <p className="mt-10 text-white/40 text-sm font-medium animate-pulse tracking-wide z-10">
-        Drag the corners or click to flip pages
+      <p className="mt-8 text-white/40 text-sm font-medium animate-pulse tracking-wide z-10">
+        Drag the corners or click left/right to flip pages
       </p>
     </div>
   );
