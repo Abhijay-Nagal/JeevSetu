@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 Role = Literal["contributor", "staff", "researcher"]
 ObservationStatus = Literal["submitted", "under_review", "forwarded", "responded"]
@@ -46,15 +45,63 @@ class StatusEvent(BaseModel):
     created_at: datetime
 
 
-class RagQuery(BaseModel):
-    question: str
+# 1. Search Schemas
+class SearchQuery(BaseModel):
+    query: str
+    limit: int = 10
+    filter_type: str | None = None
 
 
-class RagSource(BaseModel):
+class SearchResultCard(BaseModel):
+    id: str | None = None
     title: str
-    excerpt: str
+    summary: str | None = None
+    content_type: str | None = None
+    source: str | None = None
+    image_url: str | None = None
+    bnhs_url: str | None = None
+    similarity_score: float | None = None
 
 
-class RagAnswer(BaseModel):
-    answer: str
-    sources: list[RagSource]
+class SearchResponse(BaseModel):
+    results: list[SearchResultCard]
+
+
+# 2. Next Steps Schemas
+class CurrentResource(BaseModel):
+    title: str
+    content: str | None = None
+    type: str | None = None
+
+
+class NextStepsQuery(BaseModel):
+    current_resource: CurrentResource
+    user_interests: list[str] | None = None
+
+
+class NextStepAction(BaseModel):
+    action_label: str = Field(description="One of: Learn, Explore, Play, Take a quiz, Contribute, Advocate")
+    description: str
+    direct_link: str | None = None
+
+
+class NextStepsResponse(BaseModel):
+    actions: list[NextStepAction]
+
+
+# 3. Quiz Schemas
+class QuizQuery(BaseModel):
+    topic: str
+    num_questions: int = 5
+
+
+class QuizQuestion(BaseModel):
+    question: str
+    options: list[str] = Field(description="Must contain exactly 4 options (A,B,C,D formatting optional)")
+    correct_answer: int = Field(description="Index (0-3) of the correct option")
+    explanation: str
+    source_reference: str | None = None
+
+
+class QuizResponse(BaseModel):
+    questions: list[QuizQuestion]

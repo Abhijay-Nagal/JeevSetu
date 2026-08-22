@@ -1,167 +1,102 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
-const USE_MOCK =
-  import.meta.env.VITE_RAG_USE_MOCK === "true";
+const USE_MOCK = import.meta.env.VITE_RAG_USE_MOCK === "true";
 
-/**
- * Development-only mock response.
- * This allows the frontend to be developed before
- * the FastAPI RAG backend is fully available.
- */
-async function mockQueryBNHS(question) {
-  await new Promise((resolve) =>
-    setTimeout(resolve, 1200),
-  );
-
-  return {
-    answer:
-      `This is a frontend development response for:\n\n"${question}"\n\n` +
-      "The production version will retrieve relevant BNHS documents, " +
-      "send the grounded context to the LLM, and return an answer with citations.",
-    sources: [
-      {
-        title: "JBNHS — Development Source",
-        excerpt:
-          "Development placeholder used to validate the RAG frontend source-display experience.",
-      },
-      {
-        title: "Hornbill — Development Source",
-        excerpt:
-          "Development placeholder used to validate the BNHS evidence panel.",
-      },
-    ],
-  };
-}
-
-/**
- * Production RAG request.
- *
- * Backend contract:
- *
- * POST /rag/query
- *
- * Request:
- * {
- *   question: string
- * }
- *
- * Response:
- * {
- *   answer: string,
- *   sources: [
- *     {
- *       title: string,
- *       excerpt: string
- *     }
- *   ]
- * }
- */
-async function productionQueryBNHS(
-  question,
-  accessToken = null,
-) {
-  const cleanedQuestion = question.trim();
-
-  if (!cleanedQuestion) {
-    throw new Error("Please enter a question.");
+export async function searchBNHS(query, filter_type = null, accessToken = null) {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return {
+      results: [
+        {
+          id: "mock-1",
+          title: "Mock Vulture Report",
+          summary: "This is a mock resource abstract.",
+          content_type: "Species Field Accounts",
+          source: "BNHS",
+          image_url: "https://www.bnhs.org/public/img/logo-bird.png",
+          bnhs_url: "https://www.bnhs.org/",
+          similarity_score: 0.95
+        },
+      ],
+    };
   }
 
-  const headers = {
-    "Content-Type": "application/json",
-  };
+  const cleanedQuery = query.trim();
+  if (!cleanedQuery) throw new Error("Please enter a query.");
 
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
+  const headers = { "Content-Type": "application/json" };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-  let response;
-
-  try {
-    response = await fetch(
-      `${API_BASE_URL}/rag/query`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          question: cleanedQuestion,
-        }),
-      },
-    );
-  } catch {
-    throw new Error(
-      "Cannot connect to the BNHS backend. Please make sure FastAPI is running on the configured API URL.",
-    );
-  }
-
-  let data = null;
-
-  try {
-    data = await response.json();
-  } catch {
-    data = null;
-  }
+  const response = await fetch(`${API_BASE_URL}/api/search`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ query: cleanedQuery, limit: 10, filter_type }),
+  });
 
   if (!response.ok) {
-    let message =
-      `Request failed with status ${response.status}.`;
-
-    if (
-      data &&
-      typeof data === "object" &&
-      typeof data.detail === "string"
-    ) {
-      message = data.detail;
-    }
-
-    throw new Error(message);
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Request failed with status ${response.status}`);
   }
-
-  if (
-    !data ||
-    typeof data !== "object" ||
-    typeof data.answer !== "string"
-  ) {
-    throw new Error(
-      "The BNHS RAG backend returned an invalid response.",
-    );
-  }
-
-  const sources = Array.isArray(data.sources)
-    ? data.sources
-        .filter(
-          (source) =>
-            source &&
-            typeof source === "object",
-        )
-        .map((source) => ({
-          title:
-            typeof source.title === "string"
-              ? source.title
-              : "BNHS Source",
-          excerpt:
-            typeof source.excerpt === "string"
-              ? source.excerpt
-              : "",
-        }))
-    : [];
-
-  return {
-    answer: data.answer,
-    sources,
-  };
+  return response.json();
 }
 
-export async function queryBNHS(
-  question,
-  accessToken = null,
-) {
+export async function getNextSteps(current_resource, user_interests = [], accessToken = null) {
   if (USE_MOCK) {
-    return mockQueryBNHS(question);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return {
+      actions: [
+        { action_label: "Learn", description: "Read more about this", direct_link: "https://bnhs.org" },
+        { action_label: "Explore", description: "Explore Virtual Museum", direct_link: "https://collections.bnhs.org" },
+      ],
+    };
   }
 
-  return productionQueryBNHS(
-    question,
-    accessToken,
-  );
+  const headers = { "Content-Type": "application/json" };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+  const response = await fetch(`${API_BASE_URL}/api/next-steps`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ current_resource, user_interests }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Request failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getQuiz(topic, num_questions = 5, accessToken = null) {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    return {
+      questions: [
+        {
+          question: "Mock Question generated by LLM?",
+          options: ["A", "B", "C", "D"],
+          correct_answer: 0,
+          explanation: "Because A is mock correct.",
+          source_reference: "Mock BNHS Context",
+        },
+      ],
+    };
+  }
+
+  const cleanedTopic = topic.trim();
+  const headers = { "Content-Type": "application/json" };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
+  const response = await fetch(`${API_BASE_URL}/api/quiz`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ topic: cleanedTopic, num_questions }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Request failed with status ${response.status}`);
+  }
+  return response.json();
 }
