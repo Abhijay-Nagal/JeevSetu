@@ -146,6 +146,19 @@ class LikeStatus(BaseModel):
     liked_by_me: bool
 
 
+class CommentCreate(BaseModel):
+    content: str
+
+
+class Comment(BaseModel):
+    id: UUID
+    observation_id: UUID
+    user_id: UUID
+    user_name: str | None = None
+    content: str
+    created_at: datetime
+
+
 # 5. Reward System Schemas
 class CoinTransactionOut(BaseModel):
     id: UUID

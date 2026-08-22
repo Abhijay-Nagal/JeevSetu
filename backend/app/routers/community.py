@@ -3,8 +3,15 @@ from supabase import Client
 
 from app.core.auth import CurrentUser, get_current_user, require_role
 from app.core.supabase_client import get_supabase
-from app.models.schema import LikeStatus, Observation, ObservationCreate, ObservationStatusUpdate
-from app.services import likes, observations
+from app.models.schema import (
+    Comment,
+    CommentCreate,
+    LikeStatus,
+    Observation,
+    ObservationCreate,
+    ObservationStatusUpdate,
+)
+from app.services import comments, likes, observations
 
 router = APIRouter(prefix="/observations", tags=["community"])
 
@@ -62,3 +69,21 @@ async def unlike_observation(
     supabase: Client = Depends(get_supabase),
 ):
     return likes.unlike_observation(supabase, observation_id, user.id)
+
+
+@router.get("/{observation_id}/comments", response_model=list[Comment])
+async def list_comments(
+    observation_id: str,
+    supabase: Client = Depends(get_supabase),
+):
+    return comments.list_comments(supabase, observation_id)
+
+
+@router.post("/{observation_id}/comments", response_model=Comment, status_code=status.HTTP_201_CREATED)
+async def create_comment(
+    observation_id: str,
+    body: CommentCreate,
+    user: CurrentUser = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    return comments.create_comment(supabase, observation_id, user.id, body.content)
