@@ -20,3 +20,4 @@ supabase/.temp/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+frontend/public/Antigravity-x64.exe

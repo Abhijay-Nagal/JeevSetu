@@ -22,10 +22,10 @@ async def create_observation(
 
 @router.get("", response_model=list[Observation])
 async def list_observations(
-    user: CurrentUser = Depends(require_staff_or_researcher),
+    user: CurrentUser = Depends(get_current_user),
     supabase: Client = Depends(get_supabase),
 ):
-    return observations.list_all_observations(supabase)
+    return observations.list_all_observations(supabase, user.id)
 
 
 @router.get("/mine", response_model=list[Observation])

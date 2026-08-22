@@ -35,6 +35,7 @@ export const api = {
   joinCommunity: (slug) => request(`/communities/${slug}/join`, { method: "POST" }),
   leaveCommunity: (slug) => request(`/communities/${slug}/leave`, { method: "DELETE" }),
   getCommunityFeed: (slug) => request(`/communities/${slug}/feed`),
+  listAllPosts: () => request("/observations"),
   createPost: (body) => request("/observations", { method: "POST", body: JSON.stringify(body) }),
   myPosts: () => request("/observations/mine"),
   likePost: (id) => request(`/observations/${id}/like`, { method: "POST" }),

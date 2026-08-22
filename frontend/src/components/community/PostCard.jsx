@@ -3,7 +3,7 @@ import { api } from "../../lib/api";
 
 export default function PostCard({ post }) {
   const [likeCount, setLikeCount] = useState(post.like_count);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(post.liked_by_me || false);
   const [busy, setBusy] = useState(false);
 
   async function toggleLike() {

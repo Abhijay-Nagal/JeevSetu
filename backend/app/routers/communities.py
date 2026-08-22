@@ -37,9 +37,13 @@ async def get_community(slug: str, supabase: Client = Depends(get_supabase)):
 
 
 @router.get("/{slug}/feed", response_model=list[Observation])
-async def community_feed(slug: str, supabase: Client = Depends(get_supabase)):
+async def community_feed(
+    slug: str,
+    user: CurrentUser = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
     community = communities.get_community_by_slug(supabase, slug)
-    return observations.list_community_feed(supabase, community["id"])
+    return observations.list_community_feed(supabase, community["id"], user.id)
 
 
 @router.post("/{slug}/join", response_model=CommunityMember, status_code=status.HTTP_201_CREATED)

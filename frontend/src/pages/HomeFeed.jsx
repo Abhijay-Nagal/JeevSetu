@@ -1,15 +1,14 @@
 import React, { useRef } from "react";
 import HTMLFlipBook from "react-pageflip";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Leaf, Users, MessageCircle, FileText, Globe } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 
-export const route = { path: "/" };
+export const route = { layout: "app", path: "/home" };
 
 const Page = React.forwardRef((props, ref) => {
   return (
     <div 
-      className="page bg-[#F8F6E9] shadow-[inset_0_0_20px_rgba(0,0,0,0.08)] border-r border-[#0B3D2E]/10 flex flex-col justify-center items-center text-center p-8 overflow-hidden relative" 
+      className="page bg-white shadow-[inset_0_0_20px_rgba(0,0,0,0.04)] border-r border-[#0B3D2E]/5 flex flex-col justify-center items-center text-center p-8 overflow-hidden relative" 
       ref={ref}
     >
       <div className="h-full w-full flex flex-col justify-center">
@@ -24,24 +23,12 @@ const Page = React.forwardRef((props, ref) => {
   );
 });
 
-export default function Home() {
-  const { user, loading } = useAuth();
+export default function HomeFeed() {
   const bookRef = useRef(null);
 
-  if (loading) return null;
-  if (user) return <Navigate to="/home" replace />;
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B3D2E] py-12 text-[#0B3D2E] overflow-hidden">
-      <div className="w-full max-w-5xl flex justify-between px-8 pb-8 text-[#F8F6E9] items-center absolute top-6">
-         <img src="/jeevsetu-logo.png" className="h-8 brightness-0 invert" alt="JeevSetu" />
-         <div className="flex gap-6">
-           <Link to="/login" className="hover:underline font-medium text-sm">Log In</Link>
-           <Link to="/signup" className="hover:underline font-medium text-sm">Sign Up</Link>
-         </div>
-      </div>
-      
-      <div className="mt-12 md:mt-16 z-10 perspective-1000">
+    <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="z-10 perspective-1000">
         <HTMLFlipBook 
           width={400} 
           height={550} 
@@ -92,12 +79,12 @@ export default function Home() {
             <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
               Connect, share, and discover wildlife conservation initiatives and stories from your community.
             </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
+            <Link 
+              to="/explore-communities"
               className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
             >
-              Next
-            </button>
+              Go to Communities
+            </Link>
           </Page>
 
           {/* Page 4 */}
@@ -107,12 +94,12 @@ export default function Home() {
             <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
               Have a question about wildlife? Get quick guidance on wildlife, conservation, and responsible action.
             </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
+            <Link 
+              to="/chatbot"
               className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
             >
-              Next
-            </button>
+              Ask Chatbot
+            </Link>
           </Page>
 
           {/* Page 5 */}
@@ -122,12 +109,12 @@ export default function Home() {
             <p className="text-sm opacity-80 leading-relaxed px-6 text-center mb-10">
               Track the observations, reports, and contributions you've shared with the community.
             </p>
-            <button 
-              onClick={(e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); }}
+            <Link 
+              to="/submissions"
               className="inline-block rounded-full border-2 border-[#0B3D2E] px-8 py-2 text-sm text-[#0B3D2E] font-medium hover:bg-[#0B3D2E]/5 transition mx-auto"
             >
-              Next
-            </button>
+              View Submissions
+            </Link>
           </Page>
 
           {/* Page 6 */}
@@ -160,9 +147,12 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex justify-center mt-auto">
-                <Link to="/signup" className="rounded-full bg-[#F4C430] px-10 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg text-lg">
-                  Get Started
-                </Link>
+                <button 
+                  onClick={() => bookRef.current?.pageFlip()?.turnToPage(0)} 
+                  className="rounded-full bg-[#F4C430] px-10 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg text-sm"
+                >
+                  Start Over
+                </button>
               </div>
             </div>
           </Page>
@@ -177,7 +167,7 @@ export default function Home() {
         </HTMLFlipBook>
       </div>
       
-      <p className="mt-10 text-white/40 text-sm font-medium animate-pulse tracking-wide z-10">
+      <p className="mt-8 text-[#0B3D2E]/40 text-sm font-medium animate-pulse tracking-wide z-10">
         Drag the corners or click to flip pages
       </p>
     </div>

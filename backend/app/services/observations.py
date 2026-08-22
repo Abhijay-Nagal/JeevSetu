@@ -29,7 +29,24 @@ def create_observation(supabase: Client, user_id: str, body: ObservationCreate) 
     return result.data[0]
 
 
-def list_community_feed(supabase: Client, community_id: str) -> list[dict]:
+def _attach_liked_by_me(supabase: Client, posts: list[dict], user_id: str) -> list[dict]:
+    if not posts:
+        return posts
+    post_ids = [p["id"] for p in posts]
+    likes = (
+        supabase.table("observation_likes")
+        .select("observation_id")
+        .in_("observation_id", post_ids)
+        .eq("user_id", user_id)
+        .execute()
+    )
+    liked_ids = {like["observation_id"] for like in likes.data}
+    for p in posts:
+        p["liked_by_me"] = p["id"] in liked_ids
+    return posts
+
+
+def list_community_feed(supabase: Client, community_id: str, user_id: str) -> list[dict]:
     own_posts = (
         supabase.table("observations").select("*").eq("community_id", community_id).execute().data
     )
@@ -37,12 +54,13 @@ def list_community_feed(supabase: Client, community_id: str) -> list[dict]:
         supabase.table("observations").select("*").is_("community_id", "null").execute().data
     )
     combined = own_posts + global_posts
-    return sorted(combined, key=lambda row: row["created_at"], reverse=True)
+    posts = sorted(combined, key=lambda row: row["created_at"], reverse=True)
+    return _attach_liked_by_me(supabase, posts, user_id)
 
 
-def list_all_observations(supabase: Client) -> list[dict]:
+def list_all_observations(supabase: Client, user_id: str) -> list[dict]:
     result = supabase.table("observations").select("*").order("created_at", desc=True).execute()
-    return result.data
+    return _attach_liked_by_me(supabase, result.data, user_id)
 
 
 def list_own_observations(supabase: Client, user_id: str) -> list[dict]:
@@ -53,7 +71,7 @@ def list_own_observations(supabase: Client, user_id: str) -> list[dict]:
         .order("created_at", desc=True)
         .execute()
     )
-    return result.data
+    return _attach_liked_by_me(supabase, result.data, user_id)
 
 
 def update_observation_status(
