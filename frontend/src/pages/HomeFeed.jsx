@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import { Link } from "react-router-dom";
 import { Leaf, Users, MessageCircle, FileText, Globe } from "lucide-react";
+import { api } from "../lib/api";
 
 export const route = { layout: "app", path: "/home" };
 
@@ -48,6 +49,20 @@ const Page = React.forwardRef((props, ref) => {
 
 export default function HomeFeed() {
   const bookRef = useRef(null);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    Promise.all([api.listCommunities(), api.listAllPosts()])
+      .then(([communities, posts]) => {
+        const contributors = new Set(posts.map((post) => post.user_id));
+        setStats({
+          communities: communities.length,
+          reports: posts.length,
+          contributors: contributors.size,
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-4rem)] overflow-hidden">
@@ -146,16 +161,22 @@ export default function HomeFeed() {
             <h2 className="text-2xl font-bold mb-10 text-[#F8F6E9]">Every Action Counts</h2>
             <div className="flex flex-col gap-6 text-center px-8 mx-auto w-full max-w-[240px]">
               <div>
-                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">1,240+</div>
-                <div className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Community Members</div>
+                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">
+                  {stats ? stats.communities : "..."}
+                </div>
+                <div className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Communities</div>
               </div>
               <div>
-                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">386</div>
+                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">
+                  {stats ? stats.reports : "..."}
+                </div>
                 <div className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Wildlife Reports</div>
               </div>
               <div>
-                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">72</div>
-                <div className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Conservation Initiatives</div>
+                <div className="font-bold text-2xl text-[#F4C430] tracking-tight">
+                  {stats ? stats.contributors : "..."}
+                </div>
+                <div className="text-xs font-medium uppercase tracking-wider opacity-80 mt-1">Active Contributors</div>
               </div>
             </div>
           </Page>
