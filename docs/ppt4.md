@@ -1,76 +1,94 @@
-# System Architecture — Diagram + Tech Stack
+# System Architecture — Diagrams
 
-## Architecture Diagram (Mermaid)
+Two diagrams: how the features connect to each other, and a separate
+close-up of the RAG pipeline. Paste either into
+[mermaid.live](https://mermaid.live) to export as an image for the deck.
 
-Kept to ~9 nodes / short labels specifically so it renders legibly at
-slide size — paste into [mermaid.live](https://mermaid.live) to export as
-an image for the deck.
+## 1. How the Features Connect
 
 ```mermaid
 graph TD
-    subgraph FE["Frontend — React + Vite"]
-        Main["Main App<br/>Community · RAG Chat<br/>Rewards · Publications"]
-        Admin["Admin Dashboard<br/>+ Analytics"]
+    User(["Contributor"])
+    Staff(["BNHS Staff"])
+
+    subgraph Features["JeevSetu"]
+        Community["Community<br/>posts · likes · comments"]
+        RAG["Knowledge Hub<br/>search · next steps · quiz"]
+        Rewards["Rewards<br/>coins · streaks · daily question"]
+        Pubs["Publications<br/>research submissions"]
+        Admin["Admin Dashboard<br/>broadcasts"]
+        Analytics["Analytics<br/>engagement insights"]
     end
 
-    subgraph BE["FastAPI Backend"]
-        API["Routers → Services<br/>RAG · Rewards · Auth"]
-    end
+    DB[("Shared Database")]
 
-    subgraph DATA["Supabase"]
-        PG[("Postgres<br/>+ pgvector")]
-        Auth_[("Auth")]
-        Store[("Storage")]
-    end
+    User --> Community
+    User --> RAG
+    User --> Pubs
+    User --> Rewards
 
-    subgraph EXT["External APIs"]
-        Groq["Groq LLM"]
-        SMTP["SMTP"]
-    end
+    Staff --> Admin
+    Staff --> Analytics
 
-    Main -->|Bearer JWT| API
-    API -->|service-role key<br/>bypasses RLS| PG
-    API --> Groq
-    API --> SMTP
-    API --> Store
+    Community -->|earns coins for posting & liking| Rewards
+    RAG -->|daily question reuses quiz generation| Rewards
+    Pubs -->|checks related knowledge before submitting| RAG
+    Admin -->|broadcasts reach every community feed| Community
 
-    Admin -->|anon key + JWT<br/>RLS: is_staff check| PG
-
-    Main -.->|login / signup| Auth_
-    Admin -.->|login| Auth_
-    Auth_ --> PG
+    Community --- DB
+    RAG --- DB
+    Rewards --- DB
+    Pubs --- DB
+    Analytics -->|reads everything| DB
 ```
 
-**Read it as two distinct paths, not one:** the main app never talks to
-Postgres directly — everything goes through FastAPI using a trusted
-service-role key, with authorization enforced in Python. The admin
-dashboard talks to Postgres **directly** from the browser using the anon
-key and the logged-in admin's own session, authorized entirely by Postgres
-Row-Level Security (`is_staff()`). Auth itself (signup/login/session) is
-handled by Supabase Auth directly from both frontends — the backend only
-ever validates the JWT it's handed.
+**How to read it:** every feature is a lens on the same shared data, not a
+separate app. A contributor's actions in one feature ripple into another —
+posting earns coins (Rewards), answering the daily question reuses the
+Knowledge Hub's quiz engine, and a research submission checks itself
+against the same knowledge base a user would search manually. Staff-side,
+Admin and Analytics sit on top of the same data the contributor features
+write to — a broadcast posted from Admin shows up directly in every
+community's feed, and Analytics is simply a read-only view over everything
+else happening in the system.
 
-## Tech Stack
+## 2. RAG Pipeline
 
-**Frontend** — React 19, Vite, React Router v6 (auto-discovered routes),
-Tailwind CSS v4, `@supabase/supabase-js`, lucide-react
+Two separate flows: building the knowledge base (offline, one-time/batch),
+and answering a live request (online, per query).
 
-**Backend** — FastAPI, Uvicorn, Pydantic, supabase-py, Groq SDK,
-sentence-transformers (local embeddings), pypdf, smtplib
+```mermaid
+graph TD
+    subgraph Ingest["Building the Knowledge Base — offline"]
+        Sources["BNHS Sources<br/>Virtual Museum · blog · newsletters"]
+        Chunk["Break into chunks"]
+        Embed["Turn each chunk into a vector"]
+        Store[("Knowledge Base")]
+        Sources --> Chunk --> Embed --> Store
+    end
 
-**Data / Infra** — Supabase Postgres, pgvector, Supabase Auth, Supabase
-Storage, Groq API (`openai/gpt-oss-120b`), Gmail SMTP
+    subgraph Live["Answering a Request — live"]
+        Query["User query"]
+        Retrieve["Find the most relevant chunks"]
+        Generate["Generate an answer with those chunks as context"]
+        Answer["Response shown to user"]
+        Query --> Retrieve
+        Retrieve --> Generate --> Answer
+        Store -.-> Retrieve
+    end
+```
 
-## One-line summary per layer
+**The same two building blocks, used three different ways:**
 
-- **Frontend** — one React SPA, two access patterns (contributor app vs.
-  staff-only admin section)
-- **Backend** — thin routers, all logic in services, one shared Pydantic
-  contract file
-- **Database** — single Postgres instance: relational data + vector
-  search (pgvector) in one place, no separate vector DB
-- **RAG** — local embeddings for retrieval, Groq for generation, grounded
-  in BNHS's real ingested content (Hornbill, JBNHS, newsletters, blog,
-  Virtual Museum)
-- **Security** — service-role trust boundary for the main app, real RLS
-  for the admin app — not the same model reused blindly in both places
+| Feature | Retrieve? | Generate? | What happens |
+|---|:---:|:---:|---|
+| **Search** | Yes | No | Finds and returns real BNHS source documents — fastest, always grounded |
+| **Next Steps** | No | Yes | Suggests 4 follow-up actions based on what the user is already reading |
+| **Quiz** | Yes | Yes | Retrieves relevant facts, then generates questions grounded in them |
+| **Daily Question** | Yes | Yes | Same as Quiz, one question, generated once per day and cached |
+| **Publications check** | Yes | No | Same as Search, reused to show a researcher what BNHS already has before they submit |
+
+Search and Next Steps use only one half of the pipeline each; Quiz is the
+only one where retrieval directly shapes what gets generated; Daily
+Question is just Quiz scheduled and cached; the Publications check is
+literally the Search feature called from a different screen.
