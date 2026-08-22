@@ -117,9 +117,25 @@ class FakeRpc:
         raise NotImplementedError(f"FakeRpc does not implement '{self._name}'")
 
 
+class FakeAuthAdmin:
+    def __init__(self, client: "FakeSupabaseClient"):
+        self._client = client
+        self.confirmed_user_ids: list[str] = []
+
+    def update_user_by_id(self, user_id: str, attributes: dict) -> None:
+        if attributes.get("email_confirm"):
+            self.confirmed_user_ids.append(user_id)
+
+
+class FakeAuth:
+    def __init__(self, client: "FakeSupabaseClient"):
+        self.admin = FakeAuthAdmin(client)
+
+
 class FakeSupabaseClient:
     def __init__(self):
         self._tables: dict[str, FakeTable] = {}
+        self.auth = FakeAuth(self)
 
     def set_defaults(self, table_name: str, defaults: dict) -> None:
         self._get_table(table_name).default_row = defaults

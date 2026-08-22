@@ -15,6 +15,20 @@ class User(BaseModel):
     created_at: datetime
 
 
+class SendConfirmationRequest(BaseModel):
+    user_id: UUID
+    email: str
+    name: str
+
+
+class ConfirmEmailRequest(BaseModel):
+    token: str
+
+
+class ConfirmEmailResult(BaseModel):
+    already_confirmed: bool
+
+
 class ObservationCreate(BaseModel):
     species: str | None = None
     description: str | None = None
