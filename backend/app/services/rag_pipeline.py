@@ -88,6 +88,8 @@ def search_resources(body: SearchQuery) -> SearchResponse:
             source=row.get("source"),
             image_url=row.get("image_url"),
             bnhs_url=row.get("bnhs_url"),
+            file_name=row.get("file_name"),
+            author=row.get("author"),
             similarity_score=row.get("similarity"),
         )
         for row in matches

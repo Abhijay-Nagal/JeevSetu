@@ -60,6 +60,8 @@ class SearchResultCard(BaseModel):
     source: str | None = None
     image_url: str | None = None
     bnhs_url: str | None = None
+    file_name: str | None = None
+    author: str | None = None
     similarity_score: float | None = None
 
 
