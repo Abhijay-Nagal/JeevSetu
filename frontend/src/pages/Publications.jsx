@@ -72,7 +72,7 @@ function Publications() {
   }
 
   return (
-    <div className="max-w-3xl relative p-8 rounded-3xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent overflow-hidden border border-[#0B3D2E]/5 shadow-sm">
+    <div className="max-w-3xl relative p-8 rounded-3xl bg-white/70 backdrop-blur-xl overflow-hidden border border-[#0B3D2E]/10 shadow-lg">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#F4C430]/15 rounded-full blur-[80px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/10 rounded-full blur-[80px] -z-10"></div>
 

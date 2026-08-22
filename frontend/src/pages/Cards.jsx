@@ -114,8 +114,8 @@ export default function Cards() {
         Back to Collectables
       </button>
 
-      <h1 className="text-3xl font-semibold mb-2">
-        <ShinyText text="My Cards" />
+      <h1 className="text-4xl font-bold tracking-tight mb-2">
+        <ShinyText text="My Cards" variant="green" />
       </h1>
       <p className="opacity-70 mb-8 max-w-2xl text-[#0B3D2E]">
         Your collection of animal trading cards. Keep participating in communities to earn more coins and unlock new cards!

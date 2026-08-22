@@ -22,7 +22,7 @@ import SpotlightCard from "../ui/SpotlightCard";
 
 const TABS = [
   { key: "search", label: "Content Search", icon: Search, placeholder: "Search: 'vulture conservation', 'birds in wetlands'..." },
-  { key: "next-steps", label: "Next Steps", icon: Compass, placeholder: "Enter a topic to get actionable next steps..." },
+  { key: "next-steps", label: "Explore", icon: Compass, placeholder: "Enter a topic to explore..." },
   { key: "quiz", label: "Quiz", icon: Brain, placeholder: "Enter a topic to generate a quiz..." },
 ];
 

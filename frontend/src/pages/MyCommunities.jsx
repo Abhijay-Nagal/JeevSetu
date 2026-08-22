@@ -56,7 +56,7 @@ export default function MyCommunities() {
   }
 
   return (
-    <div className="max-w-3xl space-y-8 p-6 rounded-2xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent relative overflow-hidden">
+    <div className="max-w-3xl space-y-8 p-8 rounded-3xl relative overflow-hidden bg-white/70 backdrop-blur-xl border border-[#0B3D2E]/10 shadow-lg">
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#F4C430]/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
 

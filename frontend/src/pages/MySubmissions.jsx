@@ -27,15 +27,24 @@ function MySubmissions() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    api
-      .myPosts()
-      .then(setSubmissions)
-      .catch((err) => setError(err.message))
+    Promise.all([
+      api.myPosts().catch(() => []),
+      api.myResearchSubmissions().catch(() => [])
+    ])
+      .then(([posts, publications]) => {
+        const merged = [
+          ...posts.map(p => ({ ...p, _type: 'post' })),
+          ...publications.map(p => ({ ...p, _type: 'publication' }))
+        ]
+        merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        setSubmissions(merged)
+      })
+      .catch((err) => setError("Failed to load submissions."))
       .finally(() => setLoading(false))
   }, [])
 
   return (
-    <div className="max-w-3xl relative p-8 rounded-3xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent overflow-hidden border border-[#0B3D2E]/5 shadow-sm">
+    <div className="max-w-3xl relative p-8 rounded-3xl bg-white/70 backdrop-blur-xl overflow-hidden border border-[#0B3D2E]/10 shadow-lg">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#F4C430]/15 rounded-full blur-[80px] -z-10 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/10 rounded-full blur-[80px] -z-10"></div>
 
@@ -64,7 +73,7 @@ function MySubmissions() {
         <div className="space-y-5 relative z-10">
           {submissions.map((submission) => (
             <article
-              key={submission.id}
+              key={`${submission._type}-${submission.id}`}
               className="rounded-2xl border border-[#0B3D2E]/10 bg-white p-5 hover:border-[#0B3D2E]/30 transition-all shadow-sm hover:shadow-md overflow-hidden"
             >
               <div className="flex flex-col sm:flex-row gap-5">
@@ -82,17 +91,23 @@ function MySubmissions() {
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="min-w-0">
-                        {submission.species && (
-                          <p className="font-bold text-lg text-[#0B3D2E]">{submission.species}</p>
-                        )}
-                        {!submission.species && submission.description && (
+                        {submission._type === 'post' ? (
+                          <p className="font-bold text-lg text-[#0B3D2E] truncate">Post</p>
+                        ) : (
                           <p className="font-bold text-lg text-[#0B3D2E] truncate">Observation</p>
                         )}
                       </div>
                       <StatusBadge status={submission.status} />
                     </div>
-                    {submission.description && (
-                      <p className="text-sm text-[#0B3D2E]/80 line-clamp-3 leading-relaxed mb-4">{submission.description}</p>
+                    
+                    {submission.title && submission._type === 'publication' && (
+                      <p className="font-semibold text-sm text-[#0B3D2E] mb-1">{submission.title}</p>
+                    )}
+                    
+                    {(submission.abstract || submission.description) && (
+                      <p className="text-sm text-[#0B3D2E]/80 line-clamp-3 leading-relaxed mb-4">
+                        {submission.abstract || submission.description}
+                      </p>
                     )}
                   </div>
 
@@ -103,10 +118,12 @@ function MySubmissions() {
                         {submission.location}
                       </span>
                     )}
-                    <span className="flex items-center gap-1.5 text-[#0B3D2E]">
-                      <Heart size={14} className="text-red-500" />
-                      {submission.like_count}
-                    </span>
+                    {submission.like_count !== undefined && (
+                      <span className="flex items-center gap-1.5 text-[#0B3D2E]">
+                        <Heart size={14} className="text-red-500" />
+                        {submission.like_count}
+                      </span>
+                    )}
                     <span>{new Date(submission.created_at).toLocaleDateString()}</span>
                     {submission.assigned_researcher && (
                       <span className="text-[#2E7D32]">Assigned to {submission.assigned_researcher}</span>

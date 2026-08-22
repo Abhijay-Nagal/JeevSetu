@@ -64,7 +64,7 @@ export default function Home() {
   const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-start bg-[#0B3D2E] pt-16 pb-12 text-[#0B3D2E] overflow-y-auto">
+    <div className="flex min-h-screen flex-col items-center justify-start bg-[#0B3D2E] pt-16 pb-12 text-[#F8F6E9] overflow-y-auto">
       <div className="w-full max-w-5xl flex justify-between px-8 pb-8 text-[#F8F6E9] items-center absolute top-6">
          <img src="/jeevsetu-logo.png" className="h-8 brightness-0 invert" alt="JeevSetu" />
          <div className="flex gap-6 z-50 relative pointer-events-auto">

@@ -104,11 +104,9 @@ export default function ExploreCommunities() {
   }
 
   return (
-    <div className="max-w-3xl space-y-8 p-6 rounded-2xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-[#F4C430]/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
+    <div className="max-w-3xl space-y-8 p-8 rounded-3xl relative z-10 bg-white/70 backdrop-blur-xl border border-[#0B3D2E]/10 shadow-lg">
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative z-10">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
             <ShinyText text="Explore Communities" variant="green" />
@@ -117,7 +115,7 @@ export default function ExploreCommunities() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 relative z-10">
         <div className="relative flex-1 group">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-[#0B3D2E]" />
           <Input 

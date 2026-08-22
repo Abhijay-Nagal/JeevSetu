@@ -3,6 +3,7 @@ import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coin
 import { useAuth } from "../context/AuthContext"
 import { useWallet } from "../context/WalletContext"
 import SpotlightCard from "../components/ui/SpotlightCard"
+import Particles from "../components/ui/Particles"
 
 const navigation = [
   {
@@ -21,7 +22,7 @@ const navigation = [
     icon: Users,
   },
   {
-    name: "Chatbot",
+    name: "Knowledge Hub",
     path: "/chatbot",
     icon: MessageCircle,
   },
@@ -43,8 +44,17 @@ function AppLayout() {
   const coinBalance = wallet?.coin_balance ?? null
 
   return (
-    <div className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E]">
-      <aside className="fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9]">
+    <div className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E] relative">
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
+        <Particles 
+          particleCount={80}
+          speed={0.8}
+          particleColor="#0B3D2E"
+          lineColor="#0B3D2E"
+        />
+      </div>
+
+      <aside className="fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9] z-20">
         <div className="flex h-full flex-col p-6 overflow-y-auto">
 
           <div className="mb-6 flex flex-col items-center shrink-0">
@@ -111,7 +121,7 @@ function AppLayout() {
         </div>
       </aside>
 
-      <main className="ml-64 min-h-screen p-8">
+      <main className="ml-64 min-h-screen p-8 relative z-10">
         <Outlet />
       </main>
     </div>
