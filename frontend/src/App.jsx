@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+
+import AppLayout from "./layouts/AppLayout"
+import Community from "./pages/Community"
+import Chatbot from "./pages/Chatbot"
+import MySubmissions from "./pages/MySubmissions"
 
 function App() {
   const [showSplash, setShowSplash] = useState(true)
@@ -37,17 +43,36 @@ function App() {
       ) : (
         <motion.main
           key="app"
-          className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E]"
+          className="min-h-screen"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Main application will be built here */}
-          <div className="flex min-h-screen items-center justify-center">
-            <h1 className="text-3xl font-semibold">
-              JeevSetu
-            </h1>
-          </div>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<AppLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/community" replace />}
+                />
+
+                <Route
+                  path="/community"
+                  element={<Community />}
+                />
+
+                <Route
+                  path="/chatbot"
+                  element={<Chatbot />}
+                />
+
+                <Route
+                  path="/submissions"
+                  element={<MySubmissions />}
+                />
+              </Route>
+            </Routes>
+          </BrowserRouter>
         </motion.main>
       )}
     </AnimatePresence>
