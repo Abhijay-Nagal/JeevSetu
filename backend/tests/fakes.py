@@ -3,10 +3,8 @@ the services actually use. Not a general-purpose fake -- extend it if a new
 service needs a query shape it doesn't support yet.
 """
 
-import itertools
+import uuid
 from datetime import datetime, timezone
-
-_id_counter = itertools.count(1)
 
 
 class FakeResult:
@@ -21,7 +19,7 @@ class FakeTable:
 
     def new_row(self, values: dict) -> dict:
         row = {**self.default_row, **values}
-        row.setdefault("id", str(next(_id_counter)))
+        row.setdefault("id", str(uuid.uuid4()))
         row.setdefault("created_at", datetime.now(timezone.utc).isoformat())
         row.setdefault("updated_at", row["created_at"])
         self.rows.append(row)
