@@ -8,6 +8,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // The email-confirmation/magic-link redirect lands here with the auth
+    // tokens in the URL hash. supabase-js reads them automatically (it
+    // already has, by the time this effect runs), but doesn't clean up the
+    // address bar afterwards -- do that so it doesn't sit on a stray "#".
+    if (window.location.hash.includes("access_token")) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
