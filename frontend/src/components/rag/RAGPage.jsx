@@ -11,6 +11,7 @@ import {
   Megaphone,
   Handshake,
   CheckCircle2,
+  XCircle,
   ExternalLink,
   User,
   FileText,
@@ -37,6 +38,7 @@ export default function RAGPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [error, setError] = useState("");
+  const [quizAnswers, setQuizAnswers] = useState({});
 
   const currentTab = TABS.find((tab) => tab.key === activeTab);
 
@@ -45,6 +47,7 @@ export default function RAGPage() {
     setLoading(true);
     setError("");
     setResults(null);
+    setQuizAnswers({});
     try {
       if (activeTab === "search") {
         const data = await searchBNHS(query);
@@ -81,7 +84,7 @@ export default function RAGPage() {
             return (
               <button
                 key={tab.key}
-                onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); }}
+                onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); setQuizAnswers({}); }}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
                   isActive
                     ? "bg-[#F4C430] text-[#0B3D2E]"
@@ -214,37 +217,48 @@ export default function RAGPage() {
               results.length === 0 ? <p className="text-[#0B3D2E]/50 text-center py-10">No quiz questions generated for this topic yet.</p> :
               <div className="space-y-6">
                 <h3 className="text-lg font-bold border-b border-[#0B3D2E]/10 pb-2">Knowledge check</h3>
-                {results.map((q, qIdx) => (
-                  <div key={qIdx} className="bg-white rounded-xl border border-[#0B3D2E]/10 p-6 relative group overflow-hidden">
-                    <h4 className="text-base font-bold mb-4">{qIdx + 1}. {q.question}</h4>
-                    <div className="space-y-2.5 relative z-10">
-                      {q.options.map((opt, oIdx) => (
-                        <div
-                          key={oIdx}
-                          className={`flex items-center gap-3 p-3.5 rounded-lg border text-sm transition-colors ${
-                            oIdx === q.correct_answer
-                              ? "bg-[#81C784]/15 border-[#81C784]/40"
-                              : "bg-[#F8F6E9] border-[#0B3D2E]/10"
-                          }`}
-                        >
-                          <span className="font-bold text-[#0B3D2E]/40">{String.fromCharCode(65 + oIdx)}</span>
-                          <span className="flex-1">{opt}</span>
-                          {oIdx === q.correct_answer && <CheckCircle2 size={16} className="text-[#2E7D32]" />}
+                {results.map((q, qIdx) => {
+                  const selected = quizAnswers[qIdx];
+                  const attempted = selected !== undefined;
+                  return (
+                    <div key={qIdx} className="bg-white rounded-xl border border-[#0B3D2E]/10 p-6">
+                      <h4 className="text-base font-bold mb-4">{qIdx + 1}. {q.question}</h4>
+                      <div className="space-y-2.5">
+                        {q.options.map((opt, oIdx) => {
+                          const isCorrect = oIdx === q.correct_answer;
+                          const isSelected = oIdx === selected;
+                          let stateClasses = "bg-[#F8F6E9] border-[#0B3D2E]/10 hover:border-[#F4C430] cursor-pointer";
+                          if (attempted) {
+                            if (isCorrect) stateClasses = "bg-[#81C784]/15 border-[#81C784]/40";
+                            else if (isSelected) stateClasses = "bg-red-50 border-red-200";
+                            else stateClasses = "bg-[#F8F6E9] border-[#0B3D2E]/10 opacity-60";
+                          }
+                          return (
+                            <button
+                              key={oIdx}
+                              type="button"
+                              disabled={attempted}
+                              onClick={() => setQuizAnswers((prev) => ({ ...prev, [qIdx]: oIdx }))}
+                              className={`w-full flex items-center gap-3 p-3.5 rounded-lg border text-sm text-left transition-colors ${stateClasses}`}
+                            >
+                              <span className="font-bold text-[#0B3D2E]/40">{String.fromCharCode(65 + oIdx)}</span>
+                              <span className="flex-1">{opt}</span>
+                              {attempted && isCorrect && <CheckCircle2 size={16} className="text-[#2E7D32] shrink-0" />}
+                              {attempted && isSelected && !isCorrect && <XCircle size={16} className="text-red-500 shrink-0" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {attempted && (
+                        <div className="mt-5 pt-4 border-t border-[#0B3D2E]/10">
+                          <p className="text-sm text-[#0B3D2E]/70"><strong className="text-[#0B3D2E]">Explanation:</strong> {q.explanation}</p>
+                          {q.source_reference && <p className="text-xs text-[#0B3D2E]/40 mt-2">Source: {q.source_reference}</p>}
                         </div>
-                      ))}
+                      )}
                     </div>
-
-                    {/* Hover to reveal answer overlay */}
-                    <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-20 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
-                      <span className="bg-[#0B3D2E] text-[#F8F6E9] px-5 py-2.5 rounded-full font-semibold text-sm">Hover to reveal answer</span>
-                    </div>
-
-                    <div className="mt-5 pt-4 border-t border-[#0B3D2E]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative z-10">
-                      <p className="text-sm text-[#0B3D2E]/70"><strong className="text-[#0B3D2E]">Explanation:</strong> {q.explanation}</p>
-                      {q.source_reference && <p className="text-xs text-[#0B3D2E]/40 mt-2">Source: {q.source_reference}</p>}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
