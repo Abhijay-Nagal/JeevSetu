@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Coins, ArrowUpRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { api } from "../lib/api"
+import { useWallet } from "../context/WalletContext"
 
 export const route = { path: "/rewards", layout: "app" }
 
@@ -136,14 +137,8 @@ function DailyQuestionCard({ onAnswered }) {
 }
 
 function Rewards() {
-  const [wallet, setWallet] = useState(null)
+  const { wallet, refreshWallet } = useWallet()
   const [error, setError] = useState("")
-
-  const loadWallet = () => api.getWallet().then(setWallet).catch((err) => setError(err.message))
-
-  useEffect(() => {
-    loadWallet()
-  }, [])
 
   return (
     <div className="max-w-2xl">
@@ -172,7 +167,7 @@ function Rewards() {
       </div>
 
       <div className="mt-6">
-        <DailyQuestionCard onAnswered={loadWallet} />
+        <DailyQuestionCard onAnswered={refreshWallet} />
       </div>
 
       <h2 className="mt-8 mb-3 text-lg font-bold">Recent activity</h2>

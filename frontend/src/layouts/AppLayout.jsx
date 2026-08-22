@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react"
 import { NavLink, Outlet } from "react-router-dom"
 import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
-import { api } from "../lib/api"
+import { useWallet } from "../context/WalletContext"
 
 const navigation = [
   {
@@ -34,11 +33,8 @@ const navigation = [
 
 function AppLayout() {
   const { user, signOut } = useAuth()
-  const [coinBalance, setCoinBalance] = useState(null)
-
-  useEffect(() => {
-    api.getWallet().then((wallet) => setCoinBalance(wallet.coin_balance)).catch(() => {})
-  }, [])
+  const { wallet } = useWallet()
+  const coinBalance = wallet?.coin_balance ?? null
 
   return (
     <div className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E]">
