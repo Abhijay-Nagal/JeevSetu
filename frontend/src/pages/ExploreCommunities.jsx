@@ -102,7 +102,15 @@ export default function ExploreCommunities() {
   }, [communities, myCommunityIds, searchQuery])
 
   if (selected) {
-    return <CommunityDetail community={selected} onBack={() => setSelected(null)} />
+    return (
+      <CommunityDetail
+        community={selected}
+        onBack={() => setSelected(null)}
+        isMember={myCommunityIds.has(selected.id)}
+        onJoin={handleJoin}
+        onLeave={handleLeave}
+      />
+    )
   }
 
   return (

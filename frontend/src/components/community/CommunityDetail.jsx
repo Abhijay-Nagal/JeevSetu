@@ -14,7 +14,7 @@ import { api } from "../../lib/api";
 import PostCard from "./PostCard";
 import PostComposer from "./PostComposer";
 
-export default function CommunityDetail({ community, onBack }) {
+export default function CommunityDetail({ community, onBack, isMember, onJoin, onLeave }) {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,8 +23,8 @@ export default function CommunityDetail({ community, onBack }) {
   const filteredPosts = useMemo(() => {
     if (!searchQuery.trim()) return posts;
     const lowerQuery = searchQuery.toLowerCase();
-    return posts.filter(post => 
-       post.description?.toLowerCase().includes(lowerQuery) || 
+    return posts.filter(post =>
+       post.description?.toLowerCase().includes(lowerQuery) ||
        post.species?.toLowerCase().includes(lowerQuery)
     );
   }, [posts, searchQuery]);
@@ -47,7 +47,7 @@ export default function CommunityDetail({ community, onBack }) {
   async function handleJoin() {
     setError(null);
     try {
-      await api.joinCommunity(community.slug);
+      await onJoin(community);
     } catch (err) {
       setError(err.message);
     }
@@ -56,7 +56,7 @@ export default function CommunityDetail({ community, onBack }) {
   async function handleLeave() {
     setError(null);
     try {
-      await api.leaveCommunity(community.slug);
+      await onLeave(community);
     } catch (err) {
       setError(err.message);
     }
@@ -72,12 +72,15 @@ export default function CommunityDetail({ community, onBack }) {
         <h1 className="text-2xl font-bold">{community.name}</h1>
         {community.description && <p className="mt-1 opacity-70">{community.description}</p>}
         <div className="mt-3 flex gap-2">
-          <button onClick={handleJoin} className="rounded-lg bg-[#0B3D2E] px-3 py-1.5 text-sm text-white">
-            Join
-          </button>
-          <button onClick={handleLeave} className="rounded-lg border border-[#0B3D2E]/20 px-3 py-1.5 text-sm">
-            Leave
-          </button>
+          {isMember ? (
+            <button onClick={handleLeave} className="rounded-lg border border-[#0B3D2E]/20 px-3 py-1.5 text-sm">
+              Leave
+            </button>
+          ) : (
+            <button onClick={handleJoin} className="rounded-lg bg-[#0B3D2E] px-3 py-1.5 text-sm text-white">
+              Join
+            </button>
+          )}
         </div>
       </div>
 
@@ -92,31 +95,33 @@ export default function CommunityDetail({ community, onBack }) {
           />
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#0B3D2E] hover:bg-[#0B3D2E]/90 text-white">
-              <Plus className="mr-2 h-4 w-4" />
-              Create post
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create a new post</DialogTitle>
-              <DialogDescription>
-                Share something with {community.name}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="pt-4">
-              <PostComposer 
-                communitySlug={community.slug} 
-                onPosted={(post) => {
-                  setPosts((prev) => [post, ...prev]);
-                  setIsDialogOpen(false);
-                }} 
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+        {isMember && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-[#0B3D2E] hover:bg-[#0B3D2E]/90 text-white">
+                <Plus className="mr-2 h-4 w-4" />
+                Create post
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a new post</DialogTitle>
+                <DialogDescription>
+                  Share something with {community.name}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="pt-4">
+                <PostComposer
+                  communitySlug={community.slug}
+                  onPosted={(post) => {
+                    setPosts((prev) => [post, ...prev]);
+                    setIsDialogOpen(false);
+                  }}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

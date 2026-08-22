@@ -40,7 +40,17 @@ export default function MyCommunities() {
   }
 
   if (selected) {
-    return <CommunityDetail community={selected} onBack={() => setSelected(null)} />
+    return (
+      <CommunityDetail
+        community={selected}
+        onBack={() => setSelected(null)}
+        isMember
+        onLeave={async (community) => {
+          await handleLeave(community)
+          setSelected(null)
+        }}
+      />
+    )
   }
 
   return (
