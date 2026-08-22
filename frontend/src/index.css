@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --forest-green: #0B3D2E;
+  --leaf-green: #2E7D32;
+  --sage: #81C784;
+  --sun-gold: #F4C430;
+  --cream: #F8F6E9;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--forest-green);
+  color: var(--cream);
+  font-family: Arial, Helvetica, sans-serif;
+}
