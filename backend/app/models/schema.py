@@ -40,6 +40,7 @@ class ObservationCreate(BaseModel):
 class Observation(BaseModel):
     id: UUID
     user_id: UUID
+    author_name: str | None = None
     species: str | None = None
     description: str | None = None
     location: str | None = None

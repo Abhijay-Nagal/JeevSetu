@@ -39,6 +39,7 @@ class FakeQuery:
         self._pending_update: dict | None = None
         self._pending_delete = False
         self._is_null_columns: list[str] = []
+        self._in_filters: dict[str, set] = {}
         self._limit: int | None = None
 
     def insert(self, values: dict) -> "FakeQuery":
@@ -64,6 +65,10 @@ class FakeQuery:
         self._is_null_columns.append(column)
         return self
 
+    def in_(self, column: str, values: list) -> "FakeQuery":
+        self._in_filters[column] = set(values)
+        return self
+
     def limit(self, count: int) -> "FakeQuery":
         self._limit = count
         return self
@@ -83,6 +88,8 @@ class FakeQuery:
             rows = [row for row in rows if row.get(column) == value]
         for column in self._is_null_columns:
             rows = [row for row in rows if row.get(column) is None]
+        for column, allowed in self._in_filters.items():
+            rows = [row for row in rows if row.get(column) in allowed]
 
         if self._pending_update is not None:
             for row in rows:

@@ -33,7 +33,7 @@ def create_observation(supabase: Client, user_id: str, body: ObservationCreate) 
         supabase, user_id, rewards.COINS_POST_CREATED, "post_created", observation["id"]
     )
 
-    return observation
+    return _attach_author_name(supabase, [observation])[0]
 
 
 def _attach_liked_by_me(supabase: Client, posts: list[dict], user_id: str) -> list[dict]:
@@ -53,6 +53,19 @@ def _attach_liked_by_me(supabase: Client, posts: list[dict], user_id: str) -> li
     return posts
 
 
+def _attach_author_name(supabase: Client, posts: list[dict]) -> list[dict]:
+    if not posts:
+        return posts
+    author_ids = list({p["user_id"] for p in posts})
+    authors = (
+        supabase.table("users").select("id, name, email").in_("id", author_ids).execute()
+    )
+    names_by_id = {row["id"]: row.get("name") or row.get("email") for row in authors.data}
+    for p in posts:
+        p["author_name"] = names_by_id.get(p["user_id"])
+    return posts
+
+
 def list_community_feed(supabase: Client, community_id: str, user_id: str) -> list[dict]:
     own_posts = (
         supabase.table("observations").select("*").eq("community_id", community_id).execute().data
@@ -62,12 +75,14 @@ def list_community_feed(supabase: Client, community_id: str, user_id: str) -> li
     )
     combined = own_posts + global_posts
     posts = sorted(combined, key=lambda row: row["created_at"], reverse=True)
+    posts = _attach_author_name(supabase, posts)
     return _attach_liked_by_me(supabase, posts, user_id)
 
 
 def list_all_observations(supabase: Client, user_id: str) -> list[dict]:
     result = supabase.table("observations").select("*").order("created_at", desc=True).execute()
-    return _attach_liked_by_me(supabase, result.data, user_id)
+    posts = _attach_author_name(supabase, result.data)
+    return _attach_liked_by_me(supabase, posts, user_id)
 
 
 def list_own_observations(supabase: Client, user_id: str) -> list[dict]:
@@ -78,7 +93,8 @@ def list_own_observations(supabase: Client, user_id: str) -> list[dict]:
         .order("created_at", desc=True)
         .execute()
     )
-    return _attach_liked_by_me(supabase, result.data, user_id)
+    posts = _attach_author_name(supabase, result.data)
+    return _attach_liked_by_me(supabase, posts, user_id)
 
 
 def update_observation_status(
