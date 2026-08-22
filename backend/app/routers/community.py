@@ -3,8 +3,8 @@ from supabase import Client
 
 from app.core.auth import CurrentUser, get_current_user, require_role
 from app.core.supabase_client import get_supabase
-from app.models.schema import Observation, ObservationCreate, ObservationStatusUpdate
-from app.services import observations
+from app.models.schema import LikeStatus, Observation, ObservationCreate, ObservationStatusUpdate
+from app.services import likes, observations
 
 router = APIRouter(prefix="/observations", tags=["community"])
 
@@ -44,3 +44,21 @@ async def update_observation_status(
     supabase: Client = Depends(get_supabase),
 ):
     return observations.update_observation_status(supabase, observation_id, body)
+
+
+@router.post("/{observation_id}/like", response_model=LikeStatus)
+async def like_observation(
+    observation_id: str,
+    user: CurrentUser = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    return likes.like_observation(supabase, observation_id, user.id)
+
+
+@router.delete("/{observation_id}/like", response_model=LikeStatus)
+async def unlike_observation(
+    observation_id: str,
+    user: CurrentUser = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    return likes.unlike_observation(supabase, observation_id, user.id)

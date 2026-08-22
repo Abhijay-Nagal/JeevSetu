@@ -3,8 +3,8 @@ from supabase import Client
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.supabase_client import get_supabase
-from app.models.schema import Community, CommunityCreate, CommunityMember
-from app.services import communities
+from app.models.schema import Community, CommunityCreate, CommunityMember, Observation
+from app.services import communities, observations
 
 router = APIRouter(prefix="/communities", tags=["communities"])
 
@@ -26,6 +26,12 @@ async def list_communities(supabase: Client = Depends(get_supabase)):
 @router.get("/{slug}", response_model=Community)
 async def get_community(slug: str, supabase: Client = Depends(get_supabase)):
     return communities.get_community_by_slug(supabase, slug)
+
+
+@router.get("/{slug}/feed", response_model=list[Observation])
+async def community_feed(slug: str, supabase: Client = Depends(get_supabase)):
+    community = communities.get_community_by_slug(supabase, slug)
+    return observations.list_community_feed(supabase, community["id"])
 
 
 @router.post("/{slug}/join", response_model=CommunityMember, status_code=status.HTTP_201_CREATED)

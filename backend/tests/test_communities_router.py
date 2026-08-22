@@ -62,3 +62,18 @@ def test_get_unknown_community_404s():
     response = client.get("/communities/does-not-exist")
 
     assert response.status_code == 404
+
+
+def test_community_feed_includes_global_posts():
+    client, _ = _client_as(str(uuid.uuid4()))
+    client.post("/communities", json={"name": "Mumbai Birders"})
+    client.post(
+        "/observations", json={"species": "In-community", "community_slug": "mumbai-birders"}
+    )
+    client.post("/observations", json={"species": "Global"})
+
+    response = client.get("/communities/mumbai-birders/feed")
+
+    assert response.status_code == 200
+    species = {row["species"] for row in response.json()}
+    assert species == {"In-community", "Global"}

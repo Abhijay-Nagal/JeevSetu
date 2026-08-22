@@ -84,3 +84,22 @@ def test_patch_observation_updates_status_and_logs_event():
     assert response.json()["status"] == "under_review"
     events = fake_supabase.table("status_events").select("*").execute().data
     assert events[0]["new_status"] == "under_review"
+
+
+def test_like_and_unlike_observation():
+    client, fake_supabase, _ = _client_as("staff")
+    fake_supabase.set_defaults("observations", {"status": "submitted", "like_count": 0})
+    created = (
+        fake_supabase.table("observations")
+        .insert({"species": "Cheetah", "user_id": str(uuid.uuid4())})
+        .execute()
+        .data[0]
+    )
+
+    like_response = client.post(f"/observations/{created['id']}/like")
+    assert like_response.status_code == 200
+    assert like_response.json()["like_count"] == 1
+
+    unlike_response = client.delete(f"/observations/{created['id']}/like")
+    assert unlike_response.status_code == 200
+    assert unlike_response.json()["like_count"] == 0
