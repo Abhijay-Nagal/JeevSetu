@@ -173,7 +173,27 @@ class Comment(BaseModel):
     created_at: datetime
 
 
-# 5. Reward System Schemas
+# 5. Research Submissions ("Publications") Schemas
+class RelatedRecordsQuery(BaseModel):
+    abstract: str
+
+
+class ResearchSubmissionCreate(BaseModel):
+    title: str
+    abstract: str
+    description: str | None = None
+    species: str | None = None
+    location: str | None = None
+    media_url: str | None = None
+
+
+class ResearchSubmission(ResearchSubmissionCreate):
+    id: UUID
+    user_id: UUID
+    created_at: datetime
+
+
+# 6. Reward System Schemas
 class CoinTransactionOut(BaseModel):
     id: UUID
     amount: int

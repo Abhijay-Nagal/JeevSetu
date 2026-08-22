@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.routers import auth_email, communities, community, rag, rewards
+from app.routers import auth_email, communities, community, rag, research, rewards
 
 app = FastAPI(title="BNHS Code for Good API")
 
@@ -39,6 +39,7 @@ app.include_router(auth_email.router)
 app.include_router(communities.router)
 app.include_router(community.router)
 app.include_router(rag.router)
+app.include_router(research.router)
 app.include_router(rewards.router)
 
 
