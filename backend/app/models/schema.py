@@ -158,3 +158,29 @@ class CoinTransactionOut(BaseModel):
 class WalletSummary(BaseModel):
     coin_balance: int
     recent_transactions: list[CoinTransactionOut]
+
+
+class StreakStatus(BaseModel):
+    current_streak: int
+    longest_streak: int
+    freezes_available: int
+
+
+class DailyQuestionPublic(BaseModel):
+    id: UUID
+    question: str
+    options: list[str]
+    already_answered: bool
+    streak: StreakStatus
+
+
+class DailyQuestionAnswer(BaseModel):
+    selected_answer: int
+
+
+class DailyQuestionResult(BaseModel):
+    is_correct: bool
+    correct_answer: int
+    explanation: str | None = None
+    coins_awarded: int
+    streak: StreakStatus
