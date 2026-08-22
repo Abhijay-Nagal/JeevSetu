@@ -58,7 +58,7 @@ function AppLayout() {
               className="flex items-center justify-center gap-2 rounded-xl bg-[#F4C430] px-4 py-2.5 text-sm font-bold text-[#0B3D2E] transition hover:bg-[#e0b422] relative z-10 w-full h-full"
             >
               <Coins size={16} />
-              {coinBalance === null ? "..." : coinBalance.toLocaleString()} coins
+              My Collectables
             </NavLink>
           </SpotlightCard>
 

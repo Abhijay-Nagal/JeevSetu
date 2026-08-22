@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Coins, ArrowUpRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { Coins, ArrowUpRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2, CreditCard } from "lucide-react"
 import { api } from "../lib/api"
 import { useWallet } from "../context/WalletContext"
 
@@ -139,13 +140,14 @@ function DailyQuestionCard({ onAnswered }) {
 function Rewards() {
   const { wallet, refreshWallet } = useWallet()
   const [error, setError] = useState("")
+  const navigate = useNavigate()
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-3xl font-semibold">Rewards</h1>
+      <h1 className="text-3xl font-semibold">My Collectables</h1>
       <p className="mt-2 opacity-70">
         Earn coins by answering the daily question, keeping your streak alive, and joining in
-        with communities.
+        with communities. Use your coins to collect cards!
       </p>
 
       {error && (
@@ -154,16 +156,33 @@ function Rewards() {
         </div>
       )}
 
-      <div className="mt-8 flex items-center gap-4 rounded-2xl bg-[#0B3D2E] text-[#F8F6E9] px-8 py-6">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F4C430] text-[#0B3D2E]">
-          <Coins size={26} />
-        </div>
-        <div>
-          <p className="text-sm text-[#F8F6E9]/70">Your balance</p>
-          <p className="text-3xl font-bold">
-            {wallet ? wallet.coin_balance.toLocaleString() : "..."} coins
-          </p>
-        </div>
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button className="flex items-center gap-4 rounded-2xl bg-[#0B3D2E] text-[#F8F6E9] px-6 py-6 transition hover:bg-[#0B3D2E]/90 hover:-translate-y-1 hover:shadow-md">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F4C430] text-[#0B3D2E]">
+            <Coins size={26} />
+          </div>
+          <div className="text-left flex-1">
+            <p className="text-sm font-semibold text-[#F8F6E9]/70 uppercase tracking-wider">My Coins</p>
+            <p className="text-3xl font-bold">
+              {wallet ? wallet.coin_balance.toLocaleString() : "..."}
+            </p>
+          </div>
+        </button>
+
+        <button 
+          onClick={() => navigate("/cards")}
+          className="flex items-center gap-4 rounded-2xl border-2 border-[#0B3D2E]/10 bg-white text-[#0B3D2E] px-6 py-6 transition hover:border-[#F4C430] hover:-translate-y-1 hover:shadow-md group"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#0B3D2E]/5 text-[#0B3D2E] group-hover:bg-[#F4C430]/20 group-hover:text-[#F4C430] transition-colors">
+            <CreditCard size={26} />
+          </div>
+          <div className="text-left flex-1">
+            <p className="text-sm font-semibold text-[#0B3D2E]/60 uppercase tracking-wider">My Cards</p>
+            <p className="text-3xl font-bold">
+              3
+            </p>
+          </div>
+        </button>
       </div>
 
       <div className="mt-6">
