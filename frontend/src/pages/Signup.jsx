@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { api } from "../lib/api";
 
@@ -12,7 +12,6 @@ export default function Signup() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
-  const navigate = useNavigate();
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -36,20 +35,25 @@ export default function Signup() {
     // whether Supabase already granted a session.
     api.sendConfirmationEmail(data.user.id, email, name).catch(() => {});
 
-    if (data.session) {
-      navigate("/explore-communities");
-    } else {
-      // Email confirmation is required before a session exists.
-      setConfirmationSent(true);
-    }
+    // Our confirmation email is the intended gate, not Supabase's own
+    // session state -- always show "check your email" so the user
+    // actually goes and confirms, even though Supabase already granted a
+    // session in the background (its own "Confirm email" requirement is
+    // off, so signUp() returns a session either way).
+    setConfirmationSent(true);
   }
 
   if (confirmationSent) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8F6E9] text-[#0B3D2E]">
-        <p className="max-w-sm text-center">
-          Check <strong>{email}</strong> for a confirmation link to finish signing up.
-        </p>
+      <div className="flex min-h-screen items-center justify-center bg-[#F8F6E9] text-[#0B3D2E] px-4">
+        <div className="max-w-sm text-center">
+          <p>
+            Check <strong>{email}</strong> for a confirmation link to finish signing up.
+          </p>
+          <Link to="/explore-communities" className="mt-6 inline-block text-sm underline">
+            Continue to JeevSetu
+          </Link>
+        </div>
       </div>
     );
   }
