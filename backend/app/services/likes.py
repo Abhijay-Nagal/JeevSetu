@@ -22,15 +22,16 @@ def unlike_observation(supabase: Client, observation_id: str, user_id: str) -> d
 
 
 def _has_liked(supabase: Client, observation_id: str, user_id: str) -> bool:
+    # maybe_single() returns None in supabase-py v2+ when no row matches — use limit(1)
     result = (
         supabase.table("observation_likes")
         .select("user_id")
         .eq("observation_id", observation_id)
         .eq("user_id", user_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
-    return result.data is not None
+    return bool(result.data)
 
 
 def _adjust_like_count(supabase: Client, observation_id: str, delta: int) -> None:
@@ -38,10 +39,12 @@ def _adjust_like_count(supabase: Client, observation_id: str, delta: int) -> Non
         supabase.table("observations")
         .select("like_count")
         .eq("id", observation_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
-    new_count = max(current.data["like_count"] + delta, 0)
+    if not current.data:
+        return
+    new_count = max(current.data[0]["like_count"] + delta, 0)
     supabase.table("observations").update({"like_count": new_count}).eq(
         "id", observation_id
     ).execute()
@@ -52,11 +55,12 @@ def _like_status(supabase: Client, observation_id: str, liked_by_me: bool) -> di
         supabase.table("observations")
         .select("like_count")
         .eq("id", observation_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
+    like_count = current.data[0]["like_count"] if current.data else 0
     return {
         "observation_id": observation_id,
-        "like_count": current.data["like_count"],
+        "like_count": like_count,
         "liked_by_me": liked_by_me,
     }

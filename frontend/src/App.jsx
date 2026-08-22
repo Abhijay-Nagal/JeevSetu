@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext"
 import RequireAuth from "./components/RequireAuth"
 import AppLayout from "./layouts/AppLayout"
@@ -47,8 +47,14 @@ const router = createBrowserRouter([
         <AppLayout />
       </RequireAuth>
     ),
-    children: appRoutes,
+    children: [
+      ...appRoutes,
+      // Catch-all: redirect any unknown route to explore-communities
+      { path: "*", element: <Navigate to="/explore-communities" replace /> },
+    ],
   },
+  // Catch-all outside the app shell (unauthenticated unknown routes)
+  { path: "*", element: <Navigate to="/" replace /> },
 ])
 
 function App() {

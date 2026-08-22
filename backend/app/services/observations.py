@@ -63,12 +63,12 @@ def update_observation_status(
         supabase.table("observations")
         .select("status")
         .eq("id", observation_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
     if not current.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Observation not found")
-    old_status = current.data["status"]
+    old_status = current.data[0]["status"]
 
     update = {"status": body.status}
     if body.assigned_researcher is not None:

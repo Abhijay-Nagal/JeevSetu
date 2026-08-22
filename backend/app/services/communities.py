@@ -15,7 +15,12 @@ def _slugify(name: str) -> str:
 
 def create_community(supabase: Client, user_id: str, body: CommunityCreate) -> dict:
     slug = _slugify(body.name)
-    existing = supabase.table("communities").select("id").eq("slug", slug).maybe_single().execute()
+
+    # maybe_single() returns None (not a response) in supabase-py v2+
+    # when no row matches — use limit(1) instead and check the list.
+    existing = (
+        supabase.table("communities").select("id").eq("slug", slug).limit(1).execute()
+    )
     if existing.data:
         slug = f"{slug}-{secrets.token_hex(2)}"
 
@@ -64,10 +69,10 @@ def list_my_communities(supabase: Client, user_id: str) -> list[dict]:
 
 
 def get_community_by_slug(supabase: Client, slug: str) -> dict:
-    result = supabase.table("communities").select("*").eq("slug", slug).maybe_single().execute()
+    result = supabase.table("communities").select("*").eq("slug", slug).limit(1).execute()
     if not result.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Community not found")
-    return result.data
+    return result.data[0]
 
 
 def join_community(supabase: Client, community_id: str, user_id: str) -> dict:
@@ -76,11 +81,11 @@ def join_community(supabase: Client, community_id: str, user_id: str) -> dict:
         .select("*")
         .eq("community_id", community_id)
         .eq("user_id", user_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
     if existing.data:
-        return existing.data
+        return existing.data[0]
 
     result = (
         supabase.table("community_members")
@@ -96,12 +101,12 @@ def leave_community(supabase: Client, community_id: str, user_id: str) -> None:
         .select("role")
         .eq("community_id", community_id)
         .eq("user_id", user_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
     if not membership.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not a member")
-    if membership.data["role"] == "creator":
+    if membership.data[0]["role"] == "creator":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Creator cannot leave their own community",
@@ -118,7 +123,7 @@ def is_member(supabase: Client, community_id: str, user_id: str) -> bool:
         .select("user_id")
         .eq("community_id", community_id)
         .eq("user_id", user_id)
-        .maybe_single()
+        .limit(1)
         .execute()
     )
-    return result.data is not None
+    return bool(result.data)

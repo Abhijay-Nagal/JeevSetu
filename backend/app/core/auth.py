@@ -29,10 +29,10 @@ async def get_current_user(
 
     user = auth_response.user
     profile = (
-        supabase.table("users").select("role, name").eq("id", user.id).maybe_single().execute()
+        supabase.table("users").select("role, name").eq("id", user.id).limit(1).execute()
     )
-    role = profile.data["role"] if profile.data else "contributor"
-    name = profile.data["name"] if profile.data else None
+    role = profile.data[0]["role"] if profile.data else "contributor"
+    name = profile.data[0]["name"] if profile.data else None
 
     return CurrentUser(id=user.id, email=user.email, name=name, role=role)
 
