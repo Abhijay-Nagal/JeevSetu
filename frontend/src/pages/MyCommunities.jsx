@@ -3,6 +3,7 @@ import { api } from "../lib/api"
 import CommunityCard from "../components/community/CommunityCard"
 import CommunityDetail from "../components/community/CommunityDetail"
 import ShinyText from "../components/ui/ShinyText"
+import AnimatedList from "../components/ui/AnimatedList"
 
 export const route = { layout: "app" }
 
@@ -73,7 +74,7 @@ export default function MyCommunities() {
       ) : communities.length === 0 ? (
         <p className="opacity-60 text-[#0B3D2E]">You haven't joined any communities yet -- find one under Explore.</p>
       ) : (
-        <div className="space-y-3 relative z-10">
+        <AnimatedList className="space-y-3 relative z-10" displayScrollbar={false}>
           {communities.map((community) => (
             <CommunityCard
               key={community.id}
@@ -83,7 +84,7 @@ export default function MyCommunities() {
               onLeave={handleLeave}
             />
           ))}
-        </div>
+        </AnimatedList>
       )}
     </div>
   )

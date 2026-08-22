@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog"
 import { Search, Plus } from "lucide-react"
+import AnimatedList from "../components/ui/AnimatedList"
 import ShinyText from "../components/ui/ShinyText"
 
 export const route = { layout: "app" }
@@ -175,7 +176,7 @@ export default function ExploreCommunities() {
       ) : filteredCommunities.length === 0 ? (
         <p className="opacity-60">No communities found.</p>
       ) : (
-        <div className="space-y-3">
+        <AnimatedList className="space-y-3 relative z-10" displayScrollbar={false}>
           {filteredCommunities.map((community) => (
             <CommunityCard
               key={community.id}
@@ -186,7 +187,7 @@ export default function ExploreCommunities() {
               onLeave={handleLeave}
             />
           ))}
-        </div>
+        </AnimatedList>
       )}
     </div>
   )

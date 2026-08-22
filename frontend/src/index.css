@@ -159,3 +159,19 @@ body {
     background-position: calc(100% + var(--shiny-width, 0px)) 0;
   }
 }
+
+@keyframes list-item-enter {
+  0% {
+    opacity: var(--initial-opacity, 0);
+    transform: translateY(var(--initial-y, 20px));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-list-item {
+  opacity: 0; /* starts hidden */
+  animation: list-item-enter 0.5s ease-out forwards;
+}
