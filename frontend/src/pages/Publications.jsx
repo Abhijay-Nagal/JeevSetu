@@ -14,7 +14,6 @@ function Publications() {
   const [file, setFile] = useState(null)
 
   const [relatedResults, setRelatedResults] = useState(null)
-  const [checkingRelated, setCheckingRelated] = useState(false)
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -30,25 +29,18 @@ function Publications() {
       .finally(() => setLoadingSubmissions(false))
   }, [])
 
-  async function handleCheckRelated() {
-    if (!abstract.trim()) return
-    setCheckingRelated(true)
-    setError("")
-    try {
-      const data = await api.checkRelatedRecords(abstract.trim())
-      setRelatedResults(data.results || [])
-    } catch (err) {
-      setError(err.message)
-    }
-    setCheckingRelated(false)
-  }
-
   async function handleSubmit(event) {
     event.preventDefault()
     setSubmitting(true)
     setError("")
     setSuccess(false)
+    setRelatedResults(null)
     try {
+      // Hit the RAG pipeline first -- check what BNHS already has on this
+      // topic -- then do the actual submission. Informational only, doesn't
+      // block or gate saving the submission.
+      const related = await api.checkRelatedRecords(abstract.trim())
+
       let mediaUrl = null
       if (file) {
         mediaUrl = await uploadObservationImage(file)
@@ -64,13 +56,13 @@ function Publications() {
       })
 
       setSubmissions((prev) => [submission, ...prev])
+      setRelatedResults(related.results || [])
       setTitle("")
       setAbstract("")
       setDescription("")
       setSpecies("")
       setLocation("")
       setFile(null)
-      setRelatedResults(null)
       setSuccess(true)
     } catch (err) {
       setError(err.message)
@@ -107,47 +99,11 @@ function Publications() {
             required
             rows={4}
             value={abstract}
-            onChange={(e) => { setAbstract(e.target.value); setRelatedResults(null) }}
-            placeholder="Summarize your finding -- this is what we check against BNHS's existing records."
+            onChange={(e) => setAbstract(e.target.value)}
+            placeholder="Summarize your finding -- checked against BNHS's existing records when you submit."
             className="w-full resize-none rounded-lg border border-[#0B3D2E]/20 px-3 py-2 text-sm outline-none focus:border-[#F4C430]"
           />
-          <button
-            type="button"
-            onClick={handleCheckRelated}
-            disabled={checkingRelated || !abstract.trim()}
-            className="mt-2 flex items-center gap-1.5 rounded-lg bg-[#0B3D2E]/5 px-3 py-1.5 text-xs font-medium hover:bg-[#0B3D2E]/10 disabled:opacity-50"
-          >
-            {checkingRelated ? <Loader2 size={13} className="animate-spin" /> : <Search size={13} />}
-            Check what BNHS already knows
-          </button>
         </div>
-
-        {relatedResults && (
-          <div className="rounded-lg bg-[#F8F6E9] p-3 space-y-2">
-            {relatedResults.length === 0 ? (
-              <p className="text-xs text-[#0B3D2E]/50">No closely related BNHS records found.</p>
-            ) : (
-              <>
-                <p className="text-xs font-semibold text-[#0B3D2E]/70">Related BNHS records</p>
-                {relatedResults.map((item, idx) => (
-                  <a
-                    key={idx}
-                    href={item.bnhs_url || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block rounded-md bg-white px-3 py-2 text-xs hover:border-[#F4C430] border border-transparent"
-                  >
-                    <span className="font-medium flex items-center gap-1">
-                      {item.title}
-                      <ExternalLink size={10} className="opacity-50" />
-                    </span>
-                    <span className="text-[#0B3D2E]/50 line-clamp-1">{item.summary}</span>
-                  </a>
-                ))}
-              </>
-            )}
-          </div>
-        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -198,9 +154,40 @@ function Publications() {
           disabled={submitting}
           className="w-full rounded-lg bg-[#0B3D2E] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Submitting..." : "Submit to BNHS"}
+          {submitting ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 size={15} className="animate-spin" />
+              Checking BNHS records &amp; submitting...
+            </span>
+          ) : (
+            "Submit to BNHS"
+          )}
         </button>
       </form>
+
+      {relatedResults && (
+        <div className="mt-4 rounded-2xl border border-[#0B3D2E]/10 bg-white p-4 space-y-2">
+          <p className="text-sm font-semibold flex items-center gap-1.5">
+            <Search size={14} className="text-[#2E7D32]" />
+            {relatedResults.length === 0 ? "No closely related BNHS records found" : "BNHS already has related records"}
+          </p>
+          {relatedResults.map((item, idx) => (
+            <a
+              key={idx}
+              href={item.bnhs_url || "#"}
+              target="_blank"
+              rel="noreferrer"
+              className="block rounded-md bg-[#F8F6E9] px-3 py-2 text-xs hover:border-[#F4C430] border border-transparent"
+            >
+              <span className="font-medium flex items-center gap-1">
+                {item.title}
+                <ExternalLink size={10} className="opacity-50" />
+              </span>
+              <span className="text-[#0B3D2E]/50 line-clamp-1">{item.summary}</span>
+            </a>
+          ))}
+        </div>
+      )}
 
       <h2 className="mt-8 mb-3 text-lg font-bold">My submissions</h2>
       {loadingSubmissions ? (
