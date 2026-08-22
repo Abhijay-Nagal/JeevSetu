@@ -12,6 +12,8 @@ import {
   Handshake,
   CheckCircle2,
   ExternalLink,
+  User,
+  FileText,
 } from "lucide-react";
 import { searchBNHS, getNextSteps, getQuiz } from "./ragApi";
 
@@ -155,6 +157,22 @@ export default function RAGPage() {
                         <ExternalLink size={14} className="opacity-0 group-hover:opacity-60 transition-opacity" />
                       </h4>
                       <p className="text-[#0B3D2E]/60 line-clamp-2">{item.summary}</p>
+                      {(item.author || item.file_name) && (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 pt-3 border-t border-[#0B3D2E]/10 text-xs text-[#0B3D2E]/50">
+                          {item.author && (
+                            <span className="flex items-center gap-1">
+                              <User size={12} />
+                              {item.author}
+                            </span>
+                          )}
+                          {item.file_name && (
+                            <span className="flex items-center gap-1">
+                              <FileText size={12} />
+                              {item.file_name}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </a>
                 ))}
