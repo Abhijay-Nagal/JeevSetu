@@ -30,17 +30,17 @@ def create_confirmation(supabase: Client, user_id: str) -> str:
 
 def send_confirmation_email(to_email: str, name: str, token: str) -> None:
     settings = get_settings()
-    if not settings.smtp_host or not settings.smtp_user or not settings.smtp_password:
+    if not settings.smtp_host or not settings.smtp_email or not settings.app_password:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="SMTP is not configured -- set SMTP_HOST/SMTP_USER/SMTP_PASSWORD in .env",
+            detail="SMTP is not configured -- set SMTP_EMAIL/APP_PASSWORD in .env",
         )
 
     confirm_url = f"{settings.frontend_url}/confirm-email?token={token}"
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Confirm your email for JeevSetu"
-    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_user}>"
+    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_email}>"
     message["To"] = to_email
 
     message.attach(MIMEText(_plain_text(name, confirm_url), "plain"))
@@ -48,7 +48,9 @@ def send_confirmation_email(to_email: str, name: str, token: str) -> None:
 
     with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
         server.starttls()
-        server.login(settings.smtp_user, settings.smtp_password)
+        # Gmail app passwords are shown with spaces for readability; strip
+        # them since some SMTP AUTH implementations require the raw form.
+        server.login(settings.smtp_email, settings.app_password.replace(" ", ""))
         server.send_message(message)
 
 
