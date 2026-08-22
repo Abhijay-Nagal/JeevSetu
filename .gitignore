@@ -12,6 +12,9 @@ venv/
 *.pem
 *.ppk
 
+# Supabase CLI local link state (machine-specific, not shared)
+supabase/.temp/
+
 # OS / editor
 .DS_Store
 .idea/
