@@ -66,4 +66,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ selected_answer: selectedAnswer }),
     }),
+  checkRelatedRecords: (abstract) =>
+    request("/research/check-related", { method: "POST", body: JSON.stringify({ abstract }) }),
+  submitResearch: (body) =>
+    request("/research/submissions", { method: "POST", body: JSON.stringify(body) }),
+  myResearchSubmissions: () => request("/research/submissions/mine"),
 };

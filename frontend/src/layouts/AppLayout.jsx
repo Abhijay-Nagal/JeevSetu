@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom"
-import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins } from "lucide-react"
+import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins, FlaskConical } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useWallet } from "../context/WalletContext"
 import SpotlightCard from "../components/ui/SpotlightCard"
@@ -24,6 +24,11 @@ const navigation = [
     name: "Chatbot",
     path: "/chatbot",
     icon: MessageCircle,
+  },
+  {
+    name: "Publications",
+    path: "/publications",
+    icon: FlaskConical,
   },
   {
     name: "My Submissions",
