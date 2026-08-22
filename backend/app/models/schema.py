@@ -11,6 +11,7 @@ ObservationStatus = Literal["submitted", "under_review", "forwarded", "responded
 class User(BaseModel):
     id: UUID
     email: str
+    name: str | None = None
     role: Role
     created_at: datetime
 

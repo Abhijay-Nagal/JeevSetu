@@ -7,9 +7,10 @@ bearer_scheme = HTTPBearer()
 
 
 class CurrentUser:
-    def __init__(self, id: str, email: str | None, role: str):
+    def __init__(self, id: str, email: str | None, role: str, name: str | None = None):
         self.id = id
         self.email = email
+        self.name = name
         self.role = role
 
 
@@ -27,10 +28,13 @@ async def get_current_user(
         )
 
     user = auth_response.user
-    profile = supabase.table("users").select("role").eq("id", user.id).single().execute()
+    profile = (
+        supabase.table("users").select("role, name").eq("id", user.id).maybe_single().execute()
+    )
     role = profile.data["role"] if profile.data else "contributor"
+    name = profile.data["name"] if profile.data else None
 
-    return CurrentUser(id=user.id, email=user.email, role=role)
+    return CurrentUser(id=user.id, email=user.email, name=name, role=role)
 
 
 def require_role(*allowed_roles: str):
