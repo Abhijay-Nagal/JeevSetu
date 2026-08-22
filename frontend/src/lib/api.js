@@ -40,6 +40,9 @@ export const api = {
   myPosts: () => request("/observations/mine"),
   likePost: (id) => request(`/observations/${id}/like`, { method: "POST" }),
   unlikePost: (id) => request(`/observations/${id}/like`, { method: "DELETE" }),
+  listComments: (id) => request(`/observations/${id}/comments`),
+  addComment: (id, content) =>
+    request(`/observations/${id}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
   searchKnowledgeHub: (query, limit = 10) =>
     request("/api/search", { method: "POST", body: JSON.stringify({ query, limit }) }),
   getNextSteps: (currentResource, userInterests = []) =>
