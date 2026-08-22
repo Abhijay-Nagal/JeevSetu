@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
+import { api } from "../lib/api";
 
 export const route = { path: "/signup" };
 
@@ -30,6 +31,10 @@ export default function Signup() {
       setError(signUpError.message);
       return;
     }
+
+    // Fire-and-forget: our own branded confirmation email, independent of
+    // whether Supabase already granted a session.
+    api.sendConfirmationEmail(data.user.id, email, name).catch(() => {});
 
     if (data.session) {
       navigate("/explore-communities");

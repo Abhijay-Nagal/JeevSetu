@@ -53,6 +53,13 @@ export const api = {
   getQuiz: (topic, numQuestions = 5) =>
     request("/api/quiz", { method: "POST", body: JSON.stringify({ topic, num_questions: numQuestions }) }),
   getWallet: () => request("/rewards/wallet"),
+  sendConfirmationEmail: (userId, email, name) =>
+    request("/auth/send-confirmation", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, email, name }),
+    }),
+  confirmEmail: (token) =>
+    request("/auth/confirm-email", { method: "POST", body: JSON.stringify({ token }) }),
   getDailyQuestion: () => request("/rewards/daily-question"),
   answerDailyQuestion: (selectedAnswer) =>
     request("/rewards/daily-question/answer", {
