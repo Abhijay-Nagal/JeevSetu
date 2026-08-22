@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Coins, ArrowUpRight } from "lucide-react"
+import { Coins, ArrowUpRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 import { api } from "../lib/api"
 
 export const route = { path: "/rewards", layout: "app" }
@@ -15,15 +15,134 @@ const REASON_LABELS = {
   community_created: "Created a community",
 }
 
-function Rewards() {
-  const [wallet, setWallet] = useState(null)
+function StreakBadges({ streak }) {
+  if (!streak) return null
+  return (
+    <div className="flex items-center gap-4 text-sm">
+      <span className="flex items-center gap-1.5 font-semibold">
+        <Flame size={16} className="text-[#F4C430]" />
+        {streak.current_streak}-day streak
+      </span>
+      {streak.freezes_available > 0 && (
+        <span className="flex items-center gap-1.5 text-[#0B3D2E]/60">
+          <Snowflake size={14} />
+          {streak.freezes_available} freeze{streak.freezes_available === 1 ? "" : "s"} banked
+        </span>
+      )}
+    </div>
+  )
+}
+
+function DailyQuestionCard({ onAnswered }) {
+  const [question, setQuestion] = useState(null)
+  const [selected, setSelected] = useState(undefined)
+  const [result, setResult] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
     api
-      .getWallet()
-      .then(setWallet)
+      .getDailyQuestion()
+      .then(setQuestion)
       .catch((err) => setError(err.message))
+  }, [])
+
+  const handleSelect = async (index) => {
+    if (submitting || result) return
+    setSelected(index)
+    setSubmitting(true)
+    setError("")
+    try {
+      const data = await api.answerDailyQuestion(index)
+      setResult(data)
+      onAnswered?.()
+    } catch (err) {
+      setError(err.message)
+      setSelected(undefined)
+    }
+    setSubmitting(false)
+  }
+
+  if (error) {
+    return <div className="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100">{error}</div>
+  }
+
+  if (!question) {
+    return (
+      <div className="flex items-center justify-center py-10 text-[#0B3D2E]/40">
+        <Loader2 size={20} className="animate-spin" />
+      </div>
+    )
+  }
+
+  const alreadyAnswered = question.already_answered && !result
+
+  return (
+    <div className="rounded-2xl border border-[#0B3D2E]/10 bg-white p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold">Today's question</h3>
+        <StreakBadges streak={result?.streak || question.streak} />
+      </div>
+
+      {alreadyAnswered ? (
+        <p className="text-[#0B3D2E]/60 py-4">
+          You've already answered today's question — come back tomorrow to keep your streak alive.
+        </p>
+      ) : (
+        <>
+          <p className="font-medium mb-4">{question.question}</p>
+          <div className="space-y-2.5">
+            {question.options.map((opt, idx) => {
+              const attempted = Boolean(result)
+              const isCorrect = attempted && idx === result.correct_answer
+              const isWrongSelection = attempted && idx === selected && !isCorrect
+              let stateClasses = "bg-[#F8F6E9] border-[#0B3D2E]/10 hover:border-[#F4C430] cursor-pointer"
+              if (attempted) {
+                if (isCorrect) stateClasses = "bg-[#81C784]/15 border-[#81C784]/40"
+                else if (isWrongSelection) stateClasses = "bg-red-50 border-red-200"
+                else stateClasses = "bg-[#F8F6E9] border-[#0B3D2E]/10 opacity-60"
+              }
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  disabled={attempted || submitting}
+                  onClick={() => handleSelect(idx)}
+                  className={`w-full flex items-center gap-3 p-3.5 rounded-lg border text-sm text-left transition-colors ${stateClasses}`}
+                >
+                  <span className="font-bold text-[#0B3D2E]/40">{String.fromCharCode(65 + idx)}</span>
+                  <span className="flex-1">{opt}</span>
+                  {isCorrect && <CheckCircle2 size={16} className="text-[#2E7D32] shrink-0" />}
+                  {isWrongSelection && <XCircle size={16} className="text-red-500 shrink-0" />}
+                </button>
+              )
+            })}
+          </div>
+
+          {result && (
+            <div className="mt-5 pt-4 border-t border-[#0B3D2E]/10">
+              <p className="text-sm font-semibold text-[#2E7D32]">
+                {result.is_correct ? `Correct! +${result.coins_awarded} coins` : "Not quite — no coins this time."}
+              </p>
+              {result.explanation && (
+                <p className="text-sm text-[#0B3D2E]/70 mt-1">{result.explanation}</p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+function Rewards() {
+  const [wallet, setWallet] = useState(null)
+  const [error, setError] = useState("")
+
+  const loadWallet = () => api.getWallet().then(setWallet).catch((err) => setError(err.message))
+
+  useEffect(() => {
+    loadWallet()
   }, [])
 
   return (
@@ -50,6 +169,10 @@ function Rewards() {
             {wallet ? wallet.coin_balance.toLocaleString() : "..."} coins
           </p>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <DailyQuestionCard onAnswered={loadWallet} />
       </div>
 
       <h2 className="mt-8 mb-3 text-lg font-bold">Recent activity</h2>

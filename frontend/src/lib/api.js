@@ -50,4 +50,10 @@ export const api = {
   getQuiz: (topic, numQuestions = 5) =>
     request("/api/quiz", { method: "POST", body: JSON.stringify({ topic, num_questions: numQuestions }) }),
   getWallet: () => request("/rewards/wallet"),
+  getDailyQuestion: () => request("/rewards/daily-question"),
+  answerDailyQuestion: (selectedAnswer) =>
+    request("/rewards/daily-question/answer", {
+      method: "POST",
+      body: JSON.stringify({ selected_answer: selectedAnswer }),
+    }),
 };
