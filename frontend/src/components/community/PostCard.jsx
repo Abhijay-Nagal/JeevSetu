@@ -58,6 +58,9 @@ export default function PostCard({ post }) {
 
   return (
     <article className="rounded-xl border border-[#0B3D2E]/10 bg-white p-4">
+      <p className="text-xs font-medium text-[#0B3D2E]/50 mb-2">
+        {post.author_name || "Someone"} · {new Date(post.created_at).toLocaleDateString()}
+      </p>
       {post.media_url && (
         <img src={post.media_url} alt="" className="mb-3 max-h-80 w-full rounded-lg object-cover" />
       )}
