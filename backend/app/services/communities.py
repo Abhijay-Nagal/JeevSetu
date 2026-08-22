@@ -18,9 +18,7 @@ def create_community(supabase: Client, user_id: str, body: CommunityCreate) -> d
 
     # maybe_single() returns None (not a response) in supabase-py v2+
     # when no row matches — use limit(1) instead and check the list.
-    existing = (
-        supabase.table("communities").select("id").eq("slug", slug).limit(1).execute()
-    )
+    existing = supabase.table("communities").select("id").eq("slug", slug).limit(1).execute()
     if existing.data:
         slug = f"{slug}-{secrets.token_hex(2)}"
 

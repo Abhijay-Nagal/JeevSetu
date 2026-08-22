@@ -33,13 +33,13 @@ class FakeQuery:
     def __init__(self, table: FakeTable):
         self._table = table
         self._filters: dict[str, object] = {}
-        self._single = False
         self._order_column: str | None = None
         self._order_desc = False
         self._pending_insert: dict | None = None
         self._pending_update: dict | None = None
         self._pending_delete = False
         self._is_null_columns: list[str] = []
+        self._limit: int | None = None
 
     def insert(self, values: dict) -> "FakeQuery":
         self._pending_insert = values
@@ -64,12 +64,8 @@ class FakeQuery:
         self._is_null_columns.append(column)
         return self
 
-    def single(self) -> "FakeQuery":
-        self._single = True
-        return self
-
-    def maybe_single(self) -> "FakeQuery":
-        self._single = True
+    def limit(self, count: int) -> "FakeQuery":
+        self._limit = count
         return self
 
     def order(self, column: str, desc: bool = False) -> "FakeQuery":
@@ -98,8 +94,9 @@ class FakeQuery:
         if self._order_column:
             rows = sorted(rows, key=lambda row: row[self._order_column], reverse=self._order_desc)
 
-        if self._single:
-            return FakeResult(rows[0] if rows else None)
+        if self._limit is not None:
+            rows = rows[: self._limit]
+
         return FakeResult(rows)
 
 

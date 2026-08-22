@@ -34,6 +34,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         },
     )
 
+
 app.include_router(communities.router)
 app.include_router(community.router)
 app.include_router(rag.router)

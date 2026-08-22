@@ -60,11 +60,7 @@ def update_observation_status(
     supabase: Client, observation_id: str, body: ObservationStatusUpdate
 ) -> dict:
     current = (
-        supabase.table("observations")
-        .select("status")
-        .eq("id", observation_id)
-        .limit(1)
-        .execute()
+        supabase.table("observations").select("status").eq("id", observation_id).limit(1).execute()
     )
     if not current.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Observation not found")
