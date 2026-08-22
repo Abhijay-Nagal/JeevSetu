@@ -18,6 +18,9 @@ venv/
 .vscode/*
 !.vscode/extensions.json
 
+# Supabase CLI local state
+supabase/.temp/
+
 
 #RAG
 
