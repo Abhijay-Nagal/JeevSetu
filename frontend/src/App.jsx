@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext"
+import RequireAuth from "./components/RequireAuth"
+import AppLayout from "./layouts/AppLayout"
 
 // Every page under src/pages/*.jsx becomes a route automatically -- adding a
 // page is just adding a file here, nobody edits a shared route list, so two
@@ -11,6 +13,10 @@ import { AuthProvider } from "./context/AuthContext"
 // "Home" -> "/"). A page only needs to export `route = { path: "..." }` when
 // it wants something the filename can't express, e.g. a dynamic segment like
 // "/communities/:slug/feed".
+//
+// A page opts into the sidebar shell (AppLayout) with `route.layout = "app"`
+// -- those routes are nested under AppLayout and gated by RequireAuth.
+// Everything else (Home, Login, Signup) renders standalone, full-page.
 function deriveRouteFromFilename(filePath) {
   const name = filePath.replace("./pages/", "").replace(".jsx", "")
   if (name === "Home") return "/"
@@ -19,11 +25,31 @@ function deriveRouteFromFilename(filePath) {
 }
 
 const pageModules = import.meta.glob("./pages/*.jsx", { eager: true })
-const routes = Object.entries(pageModules).map(([filePath, module]) => ({
-  path: module.route?.path ?? deriveRouteFromFilename(filePath),
-  Component: module.default,
-}))
-const router = createBrowserRouter(routes)
+const appRoutes = []
+const standaloneRoutes = []
+for (const [filePath, module] of Object.entries(pageModules)) {
+  const route = {
+    path: module.route?.path ?? deriveRouteFromFilename(filePath),
+    Component: module.default,
+  }
+  if (module.route?.layout === "app") {
+    appRoutes.push(route)
+  } else {
+    standaloneRoutes.push(route)
+  }
+}
+
+const router = createBrowserRouter([
+  ...standaloneRoutes,
+  {
+    element: (
+      <RequireAuth>
+        <AppLayout />
+      </RequireAuth>
+    ),
+    children: appRoutes,
+  },
+])
 
 function App() {
   const [showSplash, setShowSplash] = useState(true)

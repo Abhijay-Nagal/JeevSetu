@@ -1,3 +1,5 @@
+export const route = { path: "/submissions", layout: "app" }
+
 function MySubmissions() {
   return (
     <div>

@@ -1,3 +1,5 @@
+export const route = { path: "/chatbot", layout: "app" }
+
 function Chatbot() {
   return (
     <div>

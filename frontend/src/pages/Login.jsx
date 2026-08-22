@@ -25,7 +25,7 @@ export default function Login() {
       return;
     }
 
-    navigate("/");
+    navigate("/explore-communities");
   }
 
   return (

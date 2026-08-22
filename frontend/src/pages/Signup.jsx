@@ -32,7 +32,7 @@ export default function Signup() {
     }
 
     if (data.session) {
-      navigate("/");
+      navigate("/explore-communities");
     } else {
       // Email confirmation is required before a session exists.
       setConfirmationSent(true);
