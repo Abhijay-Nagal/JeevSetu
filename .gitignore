@@ -17,3 +17,12 @@ venv/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+
+#RAG
+
+.env
+.env.local
+.env.*.local
+node_modules
+dist
