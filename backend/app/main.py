@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.routers import community, rag
+from app.routers import communities, community, rag
 
 app = FastAPI(title="BNHS Code for Good API")
 
@@ -35,6 +35,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+app.include_router(communities.router)
 app.include_router(community.router)
 app.include_router(rag.router)
 
