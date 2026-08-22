@@ -9,8 +9,7 @@ class Settings(BaseSettings):
     supabase_url: str
     supabase_anon_key: str
     supabase_service_role_key: str
-    embedding_model_api_key: str = ""
-    llm_api_key: str = ""
+    groq_api_key: str = ""
 
 
 @lru_cache

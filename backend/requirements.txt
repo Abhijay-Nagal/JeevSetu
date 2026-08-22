@@ -2,4 +2,7 @@ fastapi
 uvicorn[standard]
 supabase
 pydantic-settings
-google-genai
+groq
+sentence-transformers
+pypdf
+python-dotenv
