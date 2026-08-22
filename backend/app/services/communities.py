@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from supabase import Client
 
 from app.models.schema import CommunityCreate
+from app.services import rewards
 
 
 def _slugify(name: str) -> str:
@@ -39,6 +40,10 @@ def create_community(supabase: Client, user_id: str, body: CommunityCreate) -> d
     supabase.table("community_members").insert(
         {"community_id": community["id"], "user_id": user_id, "role": "creator"}
     ).execute()
+
+    rewards.award_coins(
+        supabase, user_id, rewards.COINS_COMMUNITY_CREATED, "community_created", community["id"]
+    )
 
     return community
 
@@ -90,6 +95,11 @@ def join_community(supabase: Client, community_id: str, user_id: str) -> dict:
         .insert({"community_id": community_id, "user_id": user_id, "role": "member"})
         .execute()
     )
+
+    rewards.award_coins(
+        supabase, user_id, rewards.COINS_COMMUNITY_JOINED, "community_joined", community_id
+    )
+
     return result.data[0]
 
 

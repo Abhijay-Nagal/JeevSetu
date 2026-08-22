@@ -100,6 +100,23 @@ class FakeQuery:
         return FakeResult(rows)
 
 
+class FakeRpc:
+    """Only understands the RPCs this codebase actually calls -- extend the
+    dispatch in execute() if a service starts calling a new one.
+    """
+
+    def __init__(self, client: "FakeSupabaseClient", name: str, params: dict):
+        self._client = client
+        self._name = name
+        self._params = params
+
+    def execute(self) -> FakeResult:
+        if self._name == "award_coins":
+            self._client._award_coins(**self._params)
+            return FakeResult(None)
+        raise NotImplementedError(f"FakeRpc does not implement '{self._name}'")
+
+
 class FakeSupabaseClient:
     def __init__(self):
         self._tables: dict[str, FakeTable] = {}
@@ -109,6 +126,33 @@ class FakeSupabaseClient:
 
     def table(self, name: str) -> FakeQuery:
         return FakeQuery(self._get_table(name))
+
+    def rpc(self, name: str, params: dict) -> FakeRpc:
+        return FakeRpc(self, name, params)
+
+    def _award_coins(
+        self, p_user_id: str, p_amount: int, p_reason: str, p_reference_id: str | None = None
+    ) -> None:
+        self.table("coin_transactions").insert(
+            {
+                "user_id": p_user_id,
+                "amount": p_amount,
+                "reason": p_reason,
+                "reference_id": p_reference_id,
+            }
+        ).execute()
+
+        users_table = self._get_table("users")
+        for row in users_table.rows:
+            if row.get("id") == p_user_id:
+                row["coin_balance"] = row.get("coin_balance", 0) + p_amount
+                return
+
+        # Real Postgres always has a users row for an authenticated caller
+        # (the signup trigger creates it) -- test fixtures often use ad-hoc
+        # ids like "user-1" without bothering to seed one, so self-heal here
+        # instead of requiring every fixture to pre-create a users row.
+        users_table.rows.append({"id": p_user_id, "coin_balance": p_amount})
 
     def _get_table(self, name: str) -> FakeTable:
         if name not in self._tables:

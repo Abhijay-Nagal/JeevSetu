@@ -1,5 +1,7 @@
 from supabase import Client
 
+from app.services import rewards
+
 
 def like_observation(supabase: Client, observation_id: str, user_id: str) -> dict:
     if not _has_liked(supabase, observation_id, user_id):
@@ -7,6 +9,7 @@ def like_observation(supabase: Client, observation_id: str, user_id: str) -> dic
             {"observation_id": observation_id, "user_id": user_id}
         ).execute()
         _adjust_like_count(supabase, observation_id, delta=1)
+        _award_like_coins(supabase, observation_id, liker_id=user_id)
 
     return _like_status(supabase, observation_id, liked_by_me=True)
 
@@ -48,6 +51,19 @@ def _adjust_like_count(supabase: Client, observation_id: str, delta: int) -> Non
     supabase.table("observations").update({"like_count": new_count}).eq(
         "id", observation_id
     ).execute()
+
+
+def _award_like_coins(supabase: Client, observation_id: str, liker_id: str) -> None:
+    post = supabase.table("observations").select("user_id").eq("id", observation_id).limit(1).execute()
+    if not post.data:
+        return
+    author_id = post.data[0]["user_id"]
+    if author_id == liker_id:
+        # likes.py has no self-like prevention today -- guard the coin award
+        # specifically so self-liking can't be farmed, without changing the
+        # existing like/unlike behavior itself.
+        return
+    rewards.award_coins(supabase, author_id, rewards.COINS_POST_LIKED, "post_liked", observation_id)
 
 
 def _like_status(supabase: Client, observation_id: str, liked_by_me: bool) -> dict:

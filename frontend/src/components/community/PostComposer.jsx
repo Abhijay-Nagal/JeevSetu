@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { api } from "../../lib/api";
 import { uploadObservationImage } from "../../lib/storage";
+import { useWallet } from "../../context/WalletContext";
 
 export default function PostComposer({ communitySlug, onPosted }) {
+  const { refreshWallet } = useWallet();
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -28,6 +30,7 @@ export default function PostComposer({ communitySlug, onPosted }) {
       setDescription("");
       setFile(null);
       onPosted(post);
+      refreshWallet();
     } catch (err) {
       setError(err.message);
     } finally {

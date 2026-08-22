@@ -2,7 +2,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.models.schema import CommunityCreate
-from app.services import communities
+from app.services import communities, rewards
 from tests.fakes import FakeSupabaseClient
 
 
@@ -98,3 +98,22 @@ def test_list_my_communities_empty_when_no_memberships(fake_supabase):
     result = communities.list_my_communities(fake_supabase, "user-3")
 
     assert result == []
+
+
+def test_create_community_awards_coins_to_the_creator(fake_supabase):
+    communities.create_community(fake_supabase, "user-1", CommunityCreate(name="Mumbai Birders"))
+
+    wallet = rewards.get_wallet(fake_supabase, "user-1")
+    assert wallet["coin_balance"] == rewards.COINS_COMMUNITY_CREATED
+
+
+def test_join_community_awards_coins_once_not_on_repeat_join(fake_supabase):
+    community = communities.create_community(
+        fake_supabase, "user-1", CommunityCreate(name="Delhi Trailwalkers")
+    )
+
+    communities.join_community(fake_supabase, community["id"], "user-2")
+    communities.join_community(fake_supabase, community["id"], "user-2")
+
+    wallet = rewards.get_wallet(fake_supabase, "user-2")
+    assert wallet["coin_balance"] == rewards.COINS_COMMUNITY_JOINED

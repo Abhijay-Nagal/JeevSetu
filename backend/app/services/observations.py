@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from supabase import Client
 
 from app.models.schema import ObservationCreate, ObservationStatusUpdate
+from app.services import rewards
 from app.services.communities import get_community_by_slug, is_member
 from app.services.notifications import notify_contributor
 
@@ -26,7 +27,13 @@ def create_observation(supabase: Client, user_id: str, body: ObservationCreate) 
         "community_id": community_id,
     }
     result = supabase.table("observations").insert(row).execute()
-    return result.data[0]
+    observation = result.data[0]
+
+    rewards.award_coins(
+        supabase, user_id, rewards.COINS_POST_CREATED, "post_created", observation["id"]
+    )
+
+    return observation
 
 
 def _attach_liked_by_me(supabase: Client, posts: list[dict], user_id: str) -> list[dict]:

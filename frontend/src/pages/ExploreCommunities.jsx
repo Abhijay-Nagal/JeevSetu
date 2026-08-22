@@ -13,10 +13,12 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog"
 import { Search, Plus } from "lucide-react"
+import { useWallet } from "../context/WalletContext"
 
 export const route = { layout: "app" }
 
 export default function ExploreCommunities() {
+  const { refreshWallet } = useWallet()
   const [communities, setCommunities] = useState([])
   const [myCommunityIds, setMyCommunityIds] = useState(new Set())
   const [selected, setSelected] = useState(null)
@@ -59,6 +61,7 @@ export default function ExploreCommunities() {
       setCommunities((prev) => [community, ...prev])
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
       setIsDialogOpen(false)
+      refreshWallet()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -71,6 +74,7 @@ export default function ExploreCommunities() {
     try {
       await api.joinCommunity(community.slug)
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
+      refreshWallet()
     } catch (err) {
       setError(err.message)
     }
@@ -98,7 +102,15 @@ export default function ExploreCommunities() {
   }, [communities, myCommunityIds, searchQuery])
 
   if (selected) {
-    return <CommunityDetail community={selected} onBack={() => setSelected(null)} />
+    return (
+      <CommunityDetail
+        community={selected}
+        onBack={() => setSelected(null)}
+        isMember={myCommunityIds.has(selected.id)}
+        onJoin={handleJoin}
+        onLeave={handleLeave}
+      />
+    )
   }
 
   return (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { AuthProvider } from "./context/AuthContext"
+import { WalletProvider } from "./context/WalletContext"
 import RequireAuth from "./components/RequireAuth"
 import AppLayout from "./layouts/AppLayout"
 
@@ -44,7 +45,9 @@ const router = createBrowserRouter([
   {
     element: (
       <RequireAuth>
-        <AppLayout />
+        <WalletProvider>
+          <AppLayout />
+        </WalletProvider>
       </RequireAuth>
     ),
     children: [

@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom"
-import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut } from "lucide-react"
+import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
+import { useWallet } from "../context/WalletContext"
 
 const navigation = [
   {
@@ -32,18 +33,28 @@ const navigation = [
 
 function AppLayout() {
   const { user, signOut } = useAuth()
+  const { wallet } = useWallet()
+  const coinBalance = wallet?.coin_balance ?? null
 
   return (
     <div className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E]">
       <aside className="fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9]">
         <div className="flex h-full flex-col p-6">
-          
-          <div className="mb-10 flex flex-col items-center">
+
+          <div className="mb-6 flex flex-col items-center">
             <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="mb-2 w-48 h-auto" />
             <h1 className="sr-only">
               JeevSetu
             </h1>
           </div>
+
+          <NavLink
+            to="/rewards"
+            className="mb-6 flex items-center justify-center gap-2 rounded-xl bg-[#F4C430] px-4 py-2.5 text-sm font-bold text-[#0B3D2E] transition hover:bg-[#e0b422]"
+          >
+            <Coins size={16} />
+            {coinBalance === null ? "..." : coinBalance.toLocaleString()} coins
+          </NavLink>
 
           <nav className="space-y-2">
             {navigation.map((item) => {
