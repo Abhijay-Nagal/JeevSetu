@@ -22,6 +22,9 @@ class FakeTable:
         row.setdefault("id", str(uuid.uuid4()))
         row.setdefault("created_at", datetime.now(timezone.utc).isoformat())
         row.setdefault("updated_at", row["created_at"])
+        # community_members' timestamp column is named joined_at, not created_at --
+        # harmless to set on every table, Pydantic response models ignore extra keys.
+        row.setdefault("joined_at", row["created_at"])
         self.rows.append(row)
         return row
 
