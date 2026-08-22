@@ -13,12 +13,11 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog"
 import { Search, Plus } from "lucide-react"
-import { useWallet } from "../context/WalletContext"
+import ShinyText from "../components/ui/ShinyText"
 
 export const route = { layout: "app" }
 
 export default function ExploreCommunities() {
-  const { refreshWallet } = useWallet()
   const [communities, setCommunities] = useState([])
   const [myCommunityIds, setMyCommunityIds] = useState(new Set())
   const [selected, setSelected] = useState(null)
@@ -61,7 +60,6 @@ export default function ExploreCommunities() {
       setCommunities((prev) => [community, ...prev])
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
       setIsDialogOpen(false)
-      refreshWallet()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -74,7 +72,6 @@ export default function ExploreCommunities() {
     try {
       await api.joinCommunity(community.slug)
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
-      refreshWallet()
     } catch (err) {
       setError(err.message)
     }
@@ -102,43 +99,38 @@ export default function ExploreCommunities() {
   }, [communities, myCommunityIds, searchQuery])
 
   if (selected) {
-    return (
-      <CommunityDetail
-        community={selected}
-        onBack={() => setSelected(null)}
-        isMember={myCommunityIds.has(selected.id)}
-        onJoin={handleJoin}
-        onLeave={handleLeave}
-      />
-    )
+    return <CommunityDetail community={selected} onBack={() => setSelected(null)} />
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-3xl space-y-8 p-6 rounded-2xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#F4C430]/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
+      
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold">Explore Communities</h1>
-          <p className="mt-2 opacity-70">Discover communities, or start your own.</p>
+          <h1 className="text-4xl font-bold tracking-tight">
+            <ShinyText text="Explore Communities" />
+          </h1>
+          <p className="mt-3 text-lg opacity-80 text-[#0B3D2E]">Discover communities, or start your own.</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-[#0B3D2E]" />
           <Input 
             placeholder="Search communities..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+            className="pl-11 h-12 text-lg shadow-sm border-[#0B3D2E]/20 focus-visible:ring-[#0B3D2E] rounded-xl"
           />
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-[#0B3D2E] hover:bg-[#0B3D2E]/90 text-white">
-              <Plus className="mr-2 h-4 w-4" />
-              Create
-            </Button>
+          <DialogTrigger className="inline-flex h-12 items-center justify-center rounded-xl bg-[#0B3D2E] px-6 text-sm font-medium text-white shadow-md transition-all hover:bg-[#0B3D2E]/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+            <Plus className="mr-2 h-5 w-5" />
+            Create
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

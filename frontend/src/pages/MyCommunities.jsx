@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { api } from "../lib/api"
 import CommunityCard from "../components/community/CommunityCard"
 import CommunityDetail from "../components/community/CommunityDetail"
+import ShinyText from "../components/ui/ShinyText"
 
 export const route = { layout: "app" }
 
@@ -54,20 +55,25 @@ export default function MyCommunities() {
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-3xl space-y-8 p-6 rounded-2xl bg-gradient-to-br from-[#0B3D2E]/5 to-transparent relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#F4C430]/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
+
       <div>
-        <h1 className="text-3xl font-semibold">My Communities</h1>
-        <p className="mt-2 opacity-70">Communities you've joined.</p>
+        <h1 className="text-4xl font-bold tracking-tight">
+          <ShinyText text="My Communities" />
+        </h1>
+        <p className="mt-3 text-lg opacity-80 text-[#0B3D2E]">Communities you've joined.</p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {loading ? (
-        <p className="opacity-60">Loading...</p>
+        <p className="opacity-60 text-[#0B3D2E]">Loading...</p>
       ) : communities.length === 0 ? (
-        <p className="opacity-60">You haven't joined any communities yet -- find one under Explore.</p>
+        <p className="opacity-60 text-[#0B3D2E]">You haven't joined any communities yet -- find one under Explore.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           {communities.map((community) => (
             <CommunityCard
               key={community.id}

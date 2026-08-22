@@ -17,6 +17,8 @@ import {
   FileText,
 } from "lucide-react";
 import { api } from "../../lib/api";
+import ShinyText from "../ui/ShinyText";
+import SpotlightCard from "../ui/SpotlightCard";
 
 const TABS = [
   { key: "search", label: "Content Search", icon: Search, placeholder: "Search: 'vulture conservation', 'birds in wetlands'..." },
@@ -67,12 +69,16 @@ export default function RAGPage() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl overflow-hidden border border-[#0B3D2E]/10 shadow-sm">
+    <div className="w-full max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-[#0B3D2E]/10 shadow-sm relative z-0">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#F4C430]/10 rounded-full blur-3xl -z-10 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
 
       {/* Header */}
-      <div className="bg-[#0B3D2E] text-[#F8F6E9] px-8 py-7">
-        <h1 className="text-3xl font-bold tracking-tight">BNHS Knowledge Hub</h1>
-        <p className="text-[#F8F6E9]/70 mt-1">Search, learn, and test your knowledge of Indian wildlife</p>
+      <div className="px-8 py-7 border-b border-[#0B3D2E]/5">
+        <h1 className="text-4xl font-bold tracking-tight">
+          <ShinyText text="BNHS Knowledge Hub" />
+        </h1>
+        <p className="text-[#0B3D2E]/70 mt-2 text-lg">Search, learn, and test your knowledge of Indian wildlife</p>
       </div>
 
       {/* Navigation Tabs */}
@@ -132,13 +138,13 @@ export default function RAGPage() {
               <div className="grid gap-4">
                 <h3 className="text-lg font-bold border-b border-[#0B3D2E]/10 pb-2">Search results</h3>
                 {results.map((item, idx) => (
-                  <a
-                    key={idx}
-                    href={item.bnhs_url || "#"}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group flex flex-col md:flex-row bg-white rounded-xl border border-[#0B3D2E]/10 hover:border-[#F4C430] hover:shadow-md transition-all overflow-hidden relative"
-                  >
+                  <SpotlightCard key={idx} className="p-0 border-none bg-transparent hover:translate-y-0 shadow-none hover:shadow-none mb-2 group">
+                    <a
+                      href={item.bnhs_url || "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex flex-col md:flex-row bg-white rounded-xl border border-[#0B3D2E]/10 group-hover:border-[#0B3D2E]/20 transition-colors overflow-hidden relative"
+                    >
                     {item.similarity_score !== undefined && item.similarity_score !== null && (
                       <div className="absolute top-3 right-3 bg-[#81C784]/20 text-[#0B3D2E] text-xs font-bold px-2 py-1 rounded-full z-10">
                         {Math.round(item.similarity_score * 100)}% match
@@ -176,7 +182,8 @@ export default function RAGPage() {
                         </div>
                       )}
                     </div>
-                  </a>
+                    </a>
+                  </SpotlightCard>
                 ))}
               </div>
             )}
@@ -190,13 +197,13 @@ export default function RAGPage() {
                   {results.map((action, idx) => {
                     const Icon = ACTION_ICONS[action.action_label] || Handshake;
                     return (
-                      <a
-                        key={idx}
-                        href={action.direct_link || "#"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center p-5 rounded-xl border border-[#0B3D2E]/10 hover:border-[#F4C430] hover:shadow-md transition-all group bg-white"
-                      >
+                      <SpotlightCard key={idx} className="p-0 border-none bg-transparent hover:translate-y-0 shadow-none hover:shadow-none group h-full">
+                        <a
+                          href={action.direct_link || "#"}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center p-5 rounded-xl border border-[#0B3D2E]/10 group-hover:border-[#0B3D2E]/20 transition-colors bg-white h-full"
+                        >
                         <div className="w-11 h-11 shrink-0 rounded-full bg-[#81C784]/20 text-[#2E7D32] flex items-center justify-center mr-4 group-hover:bg-[#F4C430] group-hover:text-[#0B3D2E] transition-colors">
                           <Icon size={20} />
                         </div>
@@ -204,7 +211,8 @@ export default function RAGPage() {
                           <div className="text-xs font-bold text-[#2E7D32] uppercase tracking-wide">{action.action_label}</div>
                           <div className="text-[#0B3D2E] font-medium">{action.description}</div>
                         </div>
-                      </a>
+                        </a>
+                      </SpotlightCard>
                     );
                   })}
                 </div>
@@ -220,8 +228,9 @@ export default function RAGPage() {
                   const selected = quizAnswers[qIdx];
                   const attempted = selected !== undefined;
                   return (
-                    <div key={qIdx} className="bg-white rounded-xl border border-[#0B3D2E]/10 p-6">
-                      <h4 className="text-base font-bold mb-4">{qIdx + 1}. {q.question}</h4>
+                    <SpotlightCard key={qIdx} className="p-0 border-none bg-transparent hover:translate-y-0 shadow-none hover:shadow-none mb-2">
+                      <div className="bg-white rounded-xl border border-[#0B3D2E]/10 p-6 transition-colors hover:border-[#0B3D2E]/20">
+                        <h4 className="text-base font-bold mb-4">{qIdx + 1}. {q.question}</h4>
                       <div className="space-y-2.5">
                         {q.options.map((opt, oIdx) => {
                           const isCorrect = oIdx === q.correct_answer;
@@ -255,7 +264,8 @@ export default function RAGPage() {
                           {q.source_reference && <p className="text-xs text-[#0B3D2E]/40 mt-2">Source: {q.source_reference}</p>}
                         </div>
                       )}
-                    </div>
+                      </div>
+                    </SpotlightCard>
                   );
                 })}
               </div>
