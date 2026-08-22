@@ -144,3 +144,17 @@ class LikeStatus(BaseModel):
     observation_id: UUID
     like_count: int
     liked_by_me: bool
+
+
+# 5. Reward System Schemas
+class CoinTransactionOut(BaseModel):
+    id: UUID
+    amount: int
+    reason: str
+    reference_id: UUID | None = None
+    created_at: datetime
+
+
+class WalletSummary(BaseModel):
+    coin_balance: int
+    recent_transactions: list[CoinTransactionOut]
