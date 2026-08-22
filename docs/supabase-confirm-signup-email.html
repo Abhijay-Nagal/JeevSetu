@@ -1,0 +1,17 @@
+<!--
+Paste this into: Supabase Dashboard -> Authentication -> Emails -> Templates -> "Confirm signup"
+Subject line suggestion: Confirm your JeevSetu account
+-->
+<div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #F8F6E9;">
+  <h1 style="color: #0B3D2E; font-size: 22px; margin: 0 0 24px;">JeevSetu</h1>
+  <p style="color: #0B3D2E; font-size: 16px; line-height: 1.5;">
+    Confirm your email to finish creating your account.
+  </p>
+  <a href="{{ .ConfirmationURL }}"
+     style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #0B3D2E; color: #F8F6E9; text-decoration: none; border-radius: 6px; font-size: 16px;">
+    Confirm my account
+  </a>
+  <p style="color: #0B3D2E; font-size: 13px; opacity: 0.7; margin-top: 32px;">
+    If you didn't sign up for JeevSetu, you can safely ignore this email.
+  </p>
+</div>
