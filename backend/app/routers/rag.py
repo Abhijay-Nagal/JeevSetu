@@ -12,7 +12,9 @@ async def ingest(document_id: str, user: CurrentUser = Depends(require_role("sta
     try:
         chunk_count = rag_pipeline.ingest_document(document_id)
     except NotImplementedError:
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="RAG ingestion not yet wired up")
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="RAG ingestion not yet wired up"
+        )
     return {"document_id": document_id, "chunks": chunk_count}
 
 
@@ -21,4 +23,6 @@ async def query(body: RagQuery):
     try:
         return rag_pipeline.answer_question(body.question)
     except NotImplementedError:
-        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="RAG query not yet wired up")
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="RAG query not yet wired up"
+        )

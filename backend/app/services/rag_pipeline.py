@@ -7,10 +7,10 @@ from app.models.schema import RagAnswer
 
 
 def ingest_document(document_id: str) -> int:
-    """Chunks a `documents` row and embeds each chunk into `document_chunks`. Returns chunk count."""
+    """Chunks a `documents` row and embeds each chunk into `document_chunks`. Returns the count."""
     raise NotImplementedError
 
 
 def answer_question(question: str) -> RagAnswer:
-    """Embeds the question, retrieves top-k `document_chunks` by cosine distance, and generates an answer."""
+    """Embeds the question, retrieves top-k chunks by cosine distance, and generates an answer."""
     raise NotImplementedError

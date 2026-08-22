@@ -22,7 +22,9 @@ async def get_current_user(
 
     auth_response = supabase.auth.get_user(token)
     if auth_response is None or auth_response.user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token"
+        )
 
     user = auth_response.user
     profile = supabase.table("users").select("role").eq("id", user.id).single().execute()
@@ -34,7 +36,9 @@ async def get_current_user(
 def require_role(*allowed_roles: str):
     async def dependency(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
         if user.role not in allowed_roles:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions"
+            )
         return user
 
     return dependency
