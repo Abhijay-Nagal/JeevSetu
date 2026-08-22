@@ -181,10 +181,10 @@ function Publications() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Supporting image (optional)</label>
+          <label className="block text-sm font-medium mb-1">Supporting document or image (optional)</label>
           <input
             type="file"
-            accept="image/*"
+            accept="application/pdf,image/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="text-sm"
           />
