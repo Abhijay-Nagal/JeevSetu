@@ -6,7 +6,16 @@ from app.services.notifications import notify_contributor
 
 
 def create_observation(supabase: Client, user_id: str, body: ObservationCreate) -> dict:
-    row = {**body.model_dump(), "user_id": user_id}
+    # community_slug is handled separately once services/communities.py exists (see
+    # the community-features plan) -- excluded here so it doesn't get inserted as a
+    # literal column, which the observations table doesn't have.
+    row = {
+        "species": body.species,
+        "description": body.description,
+        "location": body.location,
+        "media_url": body.media_url,
+        "user_id": user_id,
+    }
     result = supabase.table("observations").insert(row).execute()
     return result.data[0]
 
@@ -31,7 +40,11 @@ def update_observation_status(
     supabase: Client, observation_id: str, body: ObservationStatusUpdate
 ) -> dict:
     current = (
-        supabase.table("observations").select("status").eq("id", observation_id).single().execute()
+        supabase.table("observations")
+        .select("status")
+        .eq("id", observation_id)
+        .maybe_single()
+        .execute()
     )
     if not current.data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Observation not found")
