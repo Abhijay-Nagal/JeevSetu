@@ -64,7 +64,7 @@ export default function Home() {
   const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B3D2E] py-12 text-[#0B3D2E] overflow-y-auto">
+    <div className="flex min-h-screen flex-col items-center justify-start bg-[#0B3D2E] pt-16 pb-12 text-[#0B3D2E] overflow-y-auto">
       <div className="w-full max-w-5xl flex justify-between px-8 pb-8 text-[#F8F6E9] items-center absolute top-6">
          <img src="/jeevsetu-logo.png" className="h-8 brightness-0 invert" alt="JeevSetu" />
          <div className="flex gap-6 z-50 relative pointer-events-auto">
@@ -73,10 +73,10 @@ export default function Home() {
          </div>
       </div>
       
-      <div className="z-10 perspective-1000 mt-12 w-full max-w-[800px] h-[520px] flex justify-center items-center shrink-0">
+      <div className="z-10 perspective-1000 mt-12 w-full max-w-[700px] h-[470px] flex justify-center items-center shrink-0">
         <HTMLFlipBook 
-          width={360} 
-          height={500} 
+          width={320} 
+          height={450} 
           showCover={true}
           className="mx-auto shadow-2xl drop-shadow-2xl book-container"
           ref={bookRef}

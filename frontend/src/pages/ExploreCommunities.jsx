@@ -111,7 +111,7 @@ export default function ExploreCommunities() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">
-            <ShinyText text="Explore Communities" />
+            <ShinyText text="Explore Communities" variant="green" />
           </h1>
           <p className="mt-3 text-lg opacity-80 text-[#0B3D2E]">Discover communities, or start your own.</p>
         </div>

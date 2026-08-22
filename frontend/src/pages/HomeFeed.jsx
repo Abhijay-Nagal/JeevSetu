@@ -60,11 +60,11 @@ export default function HomeFeed() {
   const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-4rem)] overflow-y-auto py-8">
-      <div className="z-10 perspective-1000 w-full max-w-[800px] h-[520px] flex justify-center items-center shrink-0">
+    <div className="flex flex-col items-center justify-start w-full min-h-[calc(100vh-4rem)] overflow-y-auto pt-1 pb-8">
+      <div className="z-10 perspective-1000 w-full max-w-[700px] h-[470px] flex justify-center items-center shrink-0">
         <HTMLFlipBook 
-          width={360} 
-          height={500} 
+          width={320} 
+          height={450} 
           showCover={true}
           className="mx-auto shadow-2xl drop-shadow-2xl book-container"
           ref={bookRef}

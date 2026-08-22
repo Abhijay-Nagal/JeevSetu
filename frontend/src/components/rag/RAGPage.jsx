@@ -76,7 +76,7 @@ export default function RAGPage() {
       {/* Header */}
       <div className="px-8 py-7 border-b border-[#0B3D2E]/5">
         <h1 className="text-4xl font-bold tracking-tight">
-          <ShinyText text="BNHS Knowledge Hub" />
+          <ShinyText text="BNHS Knowledge Hub" variant="green" />
         </h1>
         <p className="text-[#0B3D2E]/70 mt-2 text-lg">Search, learn, and test your knowledge of Indian wildlife</p>
       </div>

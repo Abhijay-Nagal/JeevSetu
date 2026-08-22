@@ -97,11 +97,9 @@ export default function CommunityDetail({ community, onBack, isMember, onJoin, o
         
         {isMember && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#0B3D2E] hover:bg-[#0B3D2E]/90 text-white">
-                <Plus className="mr-2 h-4 w-4" />
-                Create post
-              </Button>
+            <DialogTrigger render={<Button className="bg-[#0B3D2E] hover:bg-[#0B3D2E]/90 text-white" />}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create post
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>

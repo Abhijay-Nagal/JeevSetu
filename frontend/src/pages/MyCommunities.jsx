@@ -62,7 +62,7 @@ export default function MyCommunities() {
 
       <div>
         <h1 className="text-4xl font-bold tracking-tight">
-          <ShinyText text="My Communities" />
+          <ShinyText text="My Communities" variant="green" />
         </h1>
         <p className="mt-3 text-lg opacity-80 text-[#0B3D2E]">Communities you've joined.</p>
       </div>
