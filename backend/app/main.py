@@ -18,11 +18,11 @@ app.add_middleware(
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """Catch-all handler so CORS headers are still sent even on 500 errors.
+    """Catch-all so CORS headers are still sent on 500s.
 
-    Without this, Starlette's CORSMiddleware never gets to write the
-    response headers when an unhandled exception bubbles up, which makes
-    the browser report the error as a CORS failure instead of a 500.
+    Without this, an unhandled exception bypasses CORSMiddleware entirely
+    (Starlette's ServerErrorMiddleware sits outside it), so the browser
+    reports it as a CORS failure instead of showing the real 500.
     """
     return JSONResponse(
         status_code=500,

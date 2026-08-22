@@ -21,3 +21,7 @@ supabase/.temp/
 .vscode/*
 !.vscode/extensions.json
 frontend/public/Antigravity-x64.exe
+
+# Frontend
+node_modules
+dist

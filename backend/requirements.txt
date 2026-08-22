@@ -2,3 +2,7 @@ fastapi
 uvicorn[standard]
 supabase
 pydantic-settings
+groq
+sentence-transformers
+pypdf
+python-dotenv
