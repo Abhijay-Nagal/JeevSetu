@@ -64,6 +64,19 @@ def test_get_unknown_community_404s():
     assert response.status_code == 404
 
 
+def test_mine_returns_only_joined_communities():
+    client, _ = _client_as(str(uuid.uuid4()))
+    client.post("/communities", json={"name": "Mumbai Birders"})
+    client.post("/communities", json={"name": "Delhi Trailwalkers"})
+    client.post("/communities/delhi-trailwalkers/join")
+
+    response = client.get("/communities/mine")
+
+    assert response.status_code == 200
+    slugs = {community["slug"] for community in response.json()}
+    assert slugs == {"mumbai-birders", "delhi-trailwalkers"}
+
+
 def test_community_feed_includes_global_posts():
     client, _ = _client_as(str(uuid.uuid4()))
     client.post("/communities", json={"name": "Mumbai Birders"})

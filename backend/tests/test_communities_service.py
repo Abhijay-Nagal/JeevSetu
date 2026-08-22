@@ -76,3 +76,25 @@ def test_get_community_by_slug_404s_when_missing(fake_supabase):
         communities.get_community_by_slug(fake_supabase, "does-not-exist")
 
     assert exc_info.value.status_code == 404
+
+
+def test_list_my_communities_only_returns_joined(fake_supabase):
+    mumbai = communities.create_community(
+        fake_supabase, "user-1", CommunityCreate(name="Mumbai Birders")
+    )
+    communities.create_community(
+        fake_supabase, "user-2", CommunityCreate(name="Delhi Trailwalkers")
+    )
+    communities.join_community(fake_supabase, mumbai["id"], "user-3")
+
+    result = communities.list_my_communities(fake_supabase, "user-3")
+
+    assert [community["slug"] for community in result] == ["mumbai-birders"]
+
+
+def test_list_my_communities_empty_when_no_memberships(fake_supabase):
+    communities.create_community(fake_supabase, "user-1", CommunityCreate(name="Mumbai Birders"))
+
+    result = communities.list_my_communities(fake_supabase, "user-3")
+
+    assert result == []

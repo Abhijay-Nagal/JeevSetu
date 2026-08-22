@@ -45,6 +45,24 @@ def list_communities(supabase: Client) -> list[dict]:
     return result.data
 
 
+def list_my_communities(supabase: Client, user_id: str) -> list[dict]:
+    memberships = (
+        supabase.table("community_members")
+        .select("community_id")
+        .eq("user_id", user_id)
+        .execute()
+        .data
+    )
+    joined_ids = {membership["community_id"] for membership in memberships}
+    if not joined_ids:
+        return []
+
+    all_communities = (
+        supabase.table("communities").select("*").order("created_at", desc=True).execute().data
+    )
+    return [community for community in all_communities if community["id"] in joined_ids]
+
+
 def get_community_by_slug(supabase: Client, slug: str) -> dict:
     result = supabase.table("communities").select("*").eq("slug", slug).maybe_single().execute()
     if not result.data:

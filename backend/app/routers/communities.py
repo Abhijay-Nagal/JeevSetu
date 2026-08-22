@@ -23,6 +23,14 @@ async def list_communities(supabase: Client = Depends(get_supabase)):
     return communities.list_communities(supabase)
 
 
+@router.get("/mine", response_model=list[Community])
+async def list_my_communities(
+    user: CurrentUser = Depends(get_current_user),
+    supabase: Client = Depends(get_supabase),
+):
+    return communities.list_my_communities(supabase, user.id)
+
+
 @router.get("/{slug}", response_model=Community)
 async def get_community(slug: str, supabase: Client = Depends(get_supabase)):
     return communities.get_community_by_slug(supabase, slug)
