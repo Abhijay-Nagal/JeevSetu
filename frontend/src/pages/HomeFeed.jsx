@@ -70,7 +70,10 @@ export default function HomeFeed() {
           ref={bookRef}
           useMouseEvents={true}
         >
-          {/* Page 1 - Cover (Welcome to JeevSetu) */}
+          {/* Page 1 - Cover Illustration (Left) */}
+          <Page imagePage={true} imageSrc="/book/cover.jpg" bookRef={bookRef} />
+
+          {/* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */}
           <Page bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-20 h-auto mx-auto mb-4 brightness-0 invert shrink-0" />
