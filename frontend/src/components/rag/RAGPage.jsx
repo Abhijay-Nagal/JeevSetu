@@ -74,15 +74,15 @@ export default function RAGPage() {
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0B3D2E]/5 rounded-full blur-3xl -z-10"></div>
 
       {/* Header */}
-      <div className="px-8 py-7 border-b border-[#0B3D2E]/5">
-        <h1 className="text-4xl font-bold tracking-tight">
+      <div className="px-6 py-5 sm:px-8 sm:py-7 border-b border-[#0B3D2E]/5">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
           <ShinyText text="BNHS Knowledge Hub" variant="green" />
         </h1>
-        <p className="text-[#0B3D2E]/70 mt-2 text-lg">Search, learn, and test your knowledge of Indian wildlife</p>
+        <p className="text-[#0B3D2E]/70 mt-2 text-base sm:text-lg">Search, learn, and test your knowledge of Indian wildlife</p>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-1 bg-[#0B3D2E]/5 p-2">
+      <div className="flex gap-2 bg-[#0B3D2E]/5 p-2 overflow-x-auto hide-scrollbar">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -90,7 +90,7 @@ export default function RAGPage() {
             <button
               key={tab.key}
               onClick={() => { setActiveTab(tab.key); setResults(null); setError(""); setQuizAnswers({}); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition ${
                 isActive
                   ? "bg-[#F4C430] text-[#0B3D2E]"
                   : "text-[#0B3D2E]/60 hover:bg-[#0B3D2E]/10 hover:text-[#0B3D2E]"
@@ -104,9 +104,9 @@ export default function RAGPage() {
       </div>
 
       {/* Main Content Area */}
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
 
-          <form onSubmit={handleSearch} className="mb-8 flex gap-3">
+          <form onSubmit={handleSearch} className="mb-6 flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={query}
@@ -117,7 +117,7 @@ export default function RAGPage() {
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="bg-[#F4C430] hover:bg-[#e0b422] text-[#0B3D2E] px-6 rounded-xl font-semibold transition-colors disabled:bg-[#0B3D2E]/10 disabled:text-[#0B3D2E]/40 disabled:cursor-not-allowed flex items-center justify-center min-w-[110px]"
+              className="bg-[#F4C430] hover:bg-[#e0b422] text-[#0B3D2E] px-6 py-3 rounded-xl font-semibold transition-colors disabled:bg-[#0B3D2E]/10 disabled:text-[#0B3D2E]/40 disabled:cursor-not-allowed flex items-center justify-center min-w-[110px]"
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : "Search"}
             </button>

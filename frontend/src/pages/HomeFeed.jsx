@@ -56,6 +56,13 @@ const Page = React.forwardRef((props, ref) => {
 
 export default function HomeFeed() {
   const bookRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
 
@@ -115,7 +122,7 @@ export default function HomeFeed() {
           </Page>
 
           {/* Page 2 - Left Illustration (BNHS) */}
-          <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />
+          {!isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />}
 
           {/* Page 3 - Who is BNHS? */}
           <Page number="1" bookRef={bookRef}>
@@ -140,7 +147,7 @@ export default function HomeFeed() {
           </Page>
 
           {/* Page 4 - Left Illustration (Research) */}
-          <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />
+          {!isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />}
 
           {/* Page 5 - What Does BNHS Actually Do? */}
           <Page number="2" bookRef={bookRef}>
@@ -180,7 +187,7 @@ export default function HomeFeed() {
           </Page>
 
           {/* Page 6 - Left Illustration (Volunteer) */}
-          <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />
+          {!isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />}
 
           {/* Page 7 - Conservation Isn't Just About Scientists */}
           <Page number="3" bookRef={bookRef}>
@@ -209,7 +216,7 @@ export default function HomeFeed() {
           </Page>
 
           {/* Page 8 - Left Illustration (Citizen Science) */}
-          <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />
+          {!isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />}
 
           {/* Page 9 - Find Your Way to Contribute */}
           <Page number="4" bookRef={bookRef}>
@@ -236,7 +243,7 @@ export default function HomeFeed() {
           </Page>
 
           {/* Page 10 - Left Illustration (Community) */}
-          <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />
+          {!isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />}
 
           {/* Page 11 - Meet the Community */}
           <Page number="5" bookRef={bookRef}>

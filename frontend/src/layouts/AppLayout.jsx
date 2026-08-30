@@ -64,8 +64,8 @@ function AppLayout() {
       </div>
 
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between bg-[#0B3D2E] text-[#F8F6E9] p-4 z-40 fixed top-0 w-full shadow-md">
-         <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="w-32 h-auto brightness-0 invert" />
+      <div className="md:hidden flex items-center justify-between bg-[#0B3D2E] text-[#F8F6E9] h-14 px-4 z-40 fixed top-0 w-full shadow-md">
+         <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="w-24 h-auto brightness-0 invert" />
          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1">
            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
          </button>
@@ -167,7 +167,7 @@ function AppLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 md:ml-64 min-h-screen p-4 pt-24 md:p-8 relative z-10 w-full overflow-hidden">
+      <main className="flex-1 md:ml-64 min-h-screen p-4 pt-20 md:p-8 relative z-10 w-full overflow-hidden">
         <Outlet />
       </main>
     </div>
