@@ -70,11 +70,12 @@ export default function HomeFeed() {
           ref={bookRef}
           useMouseEvents={true}
         >
-          {/* Page 1 - Title Page / Copyright (Left) */}
           <Page bookRef={bookRef}>
-            <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-              <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-40 h-auto mx-auto brightness-0 invert mb-8 opacity-80" />
-              <div className="mt-auto mb-4 text-[10px] space-y-2 opacity-50 font-medium">
+            <div className="flex flex-col items-center justify-between h-full p-6 text-center">
+              <div className="flex-1 flex items-center justify-center w-full">
+                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-5/6 max-w-[280px] h-auto brightness-0 invert opacity-80 drop-shadow-lg" />
+              </div>
+              <div className="mt-auto pt-6 text-[10px] space-y-2 opacity-50 font-medium shrink-0">
                 <p>Published by JeevSetu Conservation Initiative</p>
                 <p>First Edition, 2026</p>
                 <p>© All Rights Reserved</p>
