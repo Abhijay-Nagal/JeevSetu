@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import ShinyText from "../components/ui/ShinyText";
 import SplitText from "../components/ui/SplitText";
 
-export const route = { path: "/" };
+export const route = { path: "/landing" };
 
 const Page = React.forwardRef((props, ref) => {
   return (

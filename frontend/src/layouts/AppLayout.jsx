@@ -8,7 +8,7 @@ import Particles from "../components/ui/Particles"
 const navigation = [
   {
     name: "Home",
-    path: "/home",
+    path: "/",
     icon: HomeIcon,
   },
   {

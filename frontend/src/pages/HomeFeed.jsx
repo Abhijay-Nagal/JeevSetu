@@ -6,7 +6,7 @@ import { api } from "../lib/api";
 import ShinyText from "../components/ui/ShinyText";
 import SplitText from "../components/ui/SplitText";
 
-export const route = { layout: "app", path: "/home", public: true };
+export const route = { layout: "app", path: "/", public: true };
 
 const Page = React.forwardRef((props, ref) => {
   return (
