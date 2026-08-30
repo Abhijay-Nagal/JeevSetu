@@ -96,7 +96,7 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */}
+          /* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */
           <Page bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-20 h-auto mx-auto mb-4 brightness-0 invert shrink-0" />
@@ -123,10 +123,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 2 - Left Illustration (BNHS) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />},
+          /* Page 2 - Left Illustration (BNHS) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />,
 
-          {/* Page 3 - Who is BNHS? */}
+          /* Page 3 - Who is BNHS? */
           <Page number="1" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="Meet BNHS" /></h2>
@@ -148,10 +148,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 4 - Left Illustration (Research) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />},
+          /* Page 4 - Left Illustration (Research) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />,
 
-          {/* Page 5 - What Does BNHS Actually Do? */}
+          /* Page 5 - What Does BNHS Actually Do? */
           <Page number="2" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="From Research to Conservation" /></h2>
@@ -188,10 +188,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 6 - Left Illustration (Volunteer) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />},
+          /* Page 6 - Left Illustration (Volunteer) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />,
 
-          {/* Page 7 - Conservation Isn't Just About Scientists */}
+          /* Page 7 - Conservation Isn't Just About Scientists */
           <Page number="3" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F8F6E9] leading-tight">You Can Be Part of <br/><ShinyText text="Conservation" /></h2>
@@ -217,10 +217,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 8 - Left Illustration (Citizen Science) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />},
+          /* Page 8 - Left Illustration (Citizen Science) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />,
 
-          {/* Page 9 - Find Your Way to Contribute */}
+          /* Page 9 - Find Your Way to Contribute */
           <Page number="4" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="How Can You Contribute?" /></h2>
@@ -244,10 +244,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 10 - Left Illustration (Community) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />},
+          /* Page 10 - Left Illustration (Community) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />,
 
-          {/* Page 11 - Meet the Community */}
+          /* Page 11 - Meet the Community */
           <Page number="5" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
@@ -271,10 +271,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 12 - Left Illustration (Action) */}
+          /* Page 12 - Left Illustration (Action) */
           <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />
 
-          {/* Page 13 - From Interest to Action */}
+          /* Page 13 - From Interest to Action */
           <Page number="6" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="See Something? Do Something." /></h2>
@@ -306,10 +306,10 @@ export default function HomeFeed() {
             </div>
           </Page>,
 
-          {/* Page 14 - Left Illustration (Final) */}
+          /* Page 14 - Left Illustration (Final) */
           <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />
 
-          {/* Page 15 - Your JeevSetu */}
+          /* Page 15 - Your JeevSetu */
           <Page number="7" bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <h2 className="text-2xl font-bold mb-6 text-[#F8F6E9] leading-tight">
@@ -346,7 +346,7 @@ export default function HomeFeed() {
             </div>
           </Page>,
           
-          {/* Page 16 - Back Cover */}
+          /* Page 16 - Back Cover */
           <Page bookRef={bookRef}>
              <div className="flex flex-col items-center justify-center h-full">
                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-40 h-auto brightness-0 invert mb-6 opacity-90 drop-shadow-md" />
