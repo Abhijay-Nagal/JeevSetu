@@ -1,10 +1,6 @@
 import { supabase } from "./supabaseClient";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error("Missing VITE_API_BASE_URL -- copy .env.example to .env and fill it in.");
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 async function request(path, options = {}) {
   const { data } = await supabase.auth.getSession();
