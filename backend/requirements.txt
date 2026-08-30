@@ -3,6 +3,6 @@ uvicorn[standard]
 supabase
 pydantic-settings
 groq
-sentence-transformers
+requests
 pypdf
 python-dotenv

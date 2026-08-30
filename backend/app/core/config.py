@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     supabase_anon_key: str
     supabase_service_role_key: str
     groq_api_key: str = ""
+    hf_token: str = ""
 
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587

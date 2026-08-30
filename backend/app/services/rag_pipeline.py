@@ -12,7 +12,7 @@ import json
 from functools import lru_cache
 
 from groq import Groq
-from sentence_transformers import SentenceTransformer
+import requests
 
 from app.core.config import get_settings
 from app.core.supabase_client import get_supabase
@@ -31,11 +31,6 @@ GROQ_MODEL = "openai/gpt-oss-120b"
 
 
 @lru_cache
-def get_embedding_model() -> SentenceTransformer:
-    return SentenceTransformer(EMBEDDING_MODEL_NAME)
-
-
-@lru_cache
 def get_groq_client() -> Groq:
     settings = get_settings()
     if not settings.groq_api_key:
@@ -44,8 +39,22 @@ def get_groq_client() -> Groq:
 
 
 def get_embedding(text: str) -> list[float]:
-    model = get_embedding_model()
-    return model.encode(text).tolist()
+    api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{EMBEDDING_MODEL_NAME}"
+    settings = get_settings()
+    headers = {"Authorization": f"Bearer {settings.hf_token}"} if settings.hf_token else {}
+    
+    response = requests.post(
+        api_url,
+        headers=headers,
+        json={"inputs": [text], "options": {"wait_for_model": True}},
+        timeout=15,
+    )
+    
+    if response.status_code != 200:
+        # Fallback to Jina if HF is down or rate limits (only for demonstration, but Jina requires key usually. Here we just error)
+        raise RuntimeError(f"Hugging Face API failed ({response.status_code}): {response.text}")
+        
+    return response.json()[0]
 
 
 def _generate_json(system: str, prompt: str) -> dict:
