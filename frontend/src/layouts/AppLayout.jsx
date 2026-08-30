@@ -65,8 +65,8 @@ function AppLayout() {
 
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between bg-[#0B3D2E] text-[#F8F6E9] h-16 px-4 z-40 fixed top-0 w-full shadow-md">
-         <span className="font-serif font-bold text-2xl tracking-wide text-white ml-2">
-           JeevSetu
+         <span className="font-serif font-bold text-2xl tracking-wide ml-2">
+           <span className="text-white">Jeev</span><span className="text-[#8CC63F]">Setu</span>
          </span>
          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1">
            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
