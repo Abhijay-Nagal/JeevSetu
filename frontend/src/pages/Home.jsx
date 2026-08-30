@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBook from "react-pageflip";
 import { Link, Navigate } from "react-router-dom";
 import { Leaf, Users, MessageCircle, FileText, Globe, Search, ArrowRight, BookOpen, Camera, Shield } from "lucide-react";
@@ -57,6 +57,13 @@ const Page = React.forwardRef((props, ref) => {
 export default function Home() {
   const { user, loading } = useAuth();
   const bookRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   if (loading) return null;
   if (user) return <Navigate to="/home" replace />;
@@ -83,23 +90,46 @@ export default function Home() {
           useMouseEvents={true}
           usePortrait={true}
         >
-          <Page bookRef={bookRef}>
-            <div className="flex flex-col items-center justify-between h-full p-6 text-center">
-              <div className="flex-1 flex items-center justify-center w-full">
-                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-5/6 max-w-[280px] h-auto brightness-0 invert opacity-80 drop-shadow-lg" />
-              </div>
-              <div className="mt-auto pt-6 text-[10px] space-y-2 opacity-50 font-medium shrink-0">
-                <p>Published by JeevSetu Conservation Initiative</p>
-                <p>First Edition, 2026</p>
-                <p>© All Rights Reserved</p>
-                <p className="pt-4 border-t border-white/20 mt-4 max-w-[200px] mx-auto">
-                  Dedicated to the incredible biodiversity of India and those who protect it.
-                </p>
-              </div>
-            </div>
-          </Page>
+          {[
 
-          {/* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */}
+          <Page bookRef={bookRef}>
+            {isMobile ? (
+              <div className="flex flex-col items-center justify-center h-full p-4 bg-[#0B3D2E]">
+                <div className="w-full h-full border-[3px] border-[#F4C430]/70 rounded-md p-2 relative shadow-inner">
+                  <div className="w-full h-full border border-[#F4C430]/40 rounded-sm flex flex-col items-center justify-center relative overflow-hidden bg-[#0a3125]">
+                    <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-[#F4C430]/60"></div>
+                    <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-[#F4C430]/60"></div>
+                    <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-[#F4C430]/60"></div>
+                    <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-[#F4C430]/60"></div>
+                    
+                    <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-44 h-auto brightness-0 invert mb-10 drop-shadow-2xl z-10 opacity-90" />
+                    
+                    <h1 className="text-[#F4C430] font-serif text-3xl font-bold tracking-widest uppercase mb-3 drop-shadow-md">JeevSetu</h1>
+                    <div className="h-px w-24 bg-[#F4C430]/50 mb-3 shadow-[0_0_8px_rgba(244,196,48,0.5)]"></div>
+                    <p className="text-[#F8F6E9]/90 text-xs tracking-widest uppercase text-center font-medium px-4 leading-relaxed">
+                      Bridging People<br/>& Wildlife
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-between h-full p-6 text-center">
+                <div className="flex-1 flex items-center justify-center w-full">
+                  <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-5/6 max-w-[280px] h-auto brightness-0 invert opacity-80 drop-shadow-lg" />
+                </div>
+                <div className="mt-auto pt-6 text-[10px] space-y-2 opacity-50 font-medium shrink-0">
+                  <p>Published by JeevSetu Conservation Initiative</p>
+                  <p>First Edition, 2026</p>
+                  <p>© All Rights Reserved</p>
+                  <p className="pt-4 border-t border-white/20 mt-4 max-w-[200px] mx-auto">
+                    Dedicated to the incredible biodiversity of India and those who protect it.
+                  </p>
+                </div>
+              </div>
+            )}
+          </Page>,
+
+          /* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */
           <Page bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-20 h-auto mx-auto mb-4 brightness-0 invert shrink-0" />
@@ -124,12 +154,12 @@ export default function Home() {
                 Begin the Journey <ArrowRight size={18} />
               </button>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 2 - Left Illustration (BNHS) */}
-          <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />
+          /* Page 2 - Left Illustration (BNHS) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />,
 
-          {/* Page 3 - Who is BNHS? */}
+          /* Page 3 - Who is BNHS? */
           <Page number="1" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="Meet BNHS" /></h2>
@@ -149,12 +179,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 4 - Left Illustration (Research) */}
-          <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />
+          /* Page 4 - Left Illustration (Research) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />,
 
-          {/* Page 5 - What Does BNHS Actually Do? */}
+          /* Page 5 - What Does BNHS Actually Do? */
           <Page number="2" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="From Research to Conservation" /></h2>
@@ -189,12 +219,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 6 - Left Illustration (Volunteer) */}
-          <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />
+          /* Page 6 - Left Illustration (Volunteer) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />,
 
-          {/* Page 7 - Conservation Isn't Just About Scientists */}
+          /* Page 7 - Conservation Isn't Just About Scientists */
           <Page number="3" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F8F6E9] leading-tight">You Can Be Part of <br/><ShinyText text="Conservation" /></h2>
@@ -218,12 +248,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 8 - Left Illustration (Citizen Science) */}
-          <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />
+          /* Page 8 - Left Illustration (Citizen Science) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />,
 
-          {/* Page 9 - Find Your Way to Contribute */}
+          /* Page 9 - Find Your Way to Contribute */
           <Page number="4" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="How Can You Contribute?" /></h2>
@@ -245,12 +275,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 10 - Left Illustration (Community) */}
-          <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />
+          /* Page 10 - Left Illustration (Community) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />,
 
-          {/* Page 11 - Meet the Community */}
+          /* Page 11 - Meet the Community */
           <Page number="5" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
@@ -272,12 +302,12 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 12 - Left Illustration (Action) */}
-          <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />
+          /* Page 12 - Left Illustration (Action) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />,
 
-          {/* Page 13 - From Interest to Action */}
+          /* Page 13 - From Interest to Action */
           <Page number="6" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="See Something? Do Something." /></h2>
@@ -307,12 +337,12 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
-          {/* Page 14 - Left Illustration (Final) */}
-          <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />
+          /* Page 14 - Left Illustration (Final) */
+          !isMobile && <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />,
 
-          {/* Page 15 - Your JeevSetu */}
+          /* Page 15 - Your JeevSetu */
           <Page number="7" bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <h2 className="text-2xl font-bold mb-6 text-[#F8F6E9] leading-tight">
@@ -347,16 +377,18 @@ export default function Home() {
                 </p>
               </div>
             </div>
-          </Page>
+          </Page>,
           
-          {/* Page 16 - Back Cover */}
+          /* Page 16 - Back Cover */
           <Page bookRef={bookRef}>
              <div className="flex flex-col items-center justify-center h-full">
                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-40 h-auto brightness-0 invert mb-6 opacity-90 drop-shadow-md" />
                <p className="text-sm font-bold text-[#F4C430] tracking-widest uppercase mb-1">JeevSetu</p>
                <p className="text-[10px] font-medium opacity-70">© 2026 All Rights Reserved</p>
              </div>
-          </Page>
+          </Page>,
+        
+          ].filter(Boolean)}
         </HTMLFlipBook>
       </div>
       
