@@ -84,7 +84,7 @@ function Publications() {
           <ShinyText text="Publications" variant="green" />
         </h1>
         <p className="mt-3 text-lg opacity-80 text-[#0B3D2E]">
-          Found something new? Submit your research to BNHS — we'll check what's already known
+          Found something new? Submit your research to BNHS we'll check what's already known
           about it before you send it in.
         </p>
       </div>
@@ -108,7 +108,7 @@ function Publications() {
             rows={4}
             value={abstract}
             onChange={(e) => setAbstract(e.target.value)}
-            placeholder="Summarize your finding — checked against BNHS's existing records when you submit."
+            placeholder="Summarize your finding checked against BNHS's existing records when you submit."
             className="w-full resize-none rounded-xl border border-[#0B3D2E]/20 bg-white px-4 py-3 text-sm outline-none transition focus:border-[#F4C430] focus:ring-2 focus:ring-[#F4C430]/30"
           />
         </div>

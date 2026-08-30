@@ -88,7 +88,7 @@ function DailyQuestionCard({ onAnswered }) {
 
       {alreadyAnswered ? (
         <p className="text-[#0B3D2E]/60 py-4">
-          You've already answered today's question — come back tomorrow to keep your streak alive.
+          You've already answered today's question come back tomorrow to keep your streak alive.
         </p>
       ) : (
         <>

@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom"
-import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins, FlaskConical } from "lucide-react"
+import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins, FlaskConical, Bell } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useWallet } from "../context/WalletContext"
 import SpotlightCard from "../components/ui/SpotlightCard"
@@ -35,6 +35,11 @@ const navigation = [
     name: "My Submissions",
     path: "/submissions",
     icon: FileText,
+  },
+  {
+    name: "Notifications",
+    path: "/notifications",
+    icon: Bell,
   },
 ]
 
@@ -106,16 +111,35 @@ function AppLayout() {
           </nav>
 
           <div className="mt-auto space-y-2 border-t border-white/10 pt-4 shrink-0 pb-4">
-            <p className="truncate px-4 text-xs text-[#F8F6E9]/60">
-              {user?.user_metadata?.name || user?.email}
-            </p>
-            <button
-              onClick={signOut}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#F8F6E9]/75 transition hover:bg-white/10 hover:text-[#F8F6E9]"
-            >
-              <LogOut size={19} />
-              Sign out
-            </button>
+            {user ? (
+              <>
+                <p className="truncate px-4 text-xs text-[#F8F6E9]/60">
+                  {user?.user_metadata?.name || user?.email}
+                </p>
+                <button
+                  onClick={signOut}
+                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#F8F6E9]/75 transition hover:bg-white/10 hover:text-[#F8F6E9]"
+                >
+                  <LogOut size={19} />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col gap-2 px-4">
+                <NavLink
+                  to="/login"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F4C430] px-4 py-2.5 text-sm font-bold text-[#0B3D2E] transition hover:bg-[#e0b422]"
+                >
+                  Log In
+                </NavLink>
+                <NavLink
+                  to="/signup"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#F4C430] px-4 py-2.5 text-sm font-bold text-[#F4C430] transition hover:bg-[#F4C430]/10"
+                >
+                  Sign Up
+                </NavLink>
+              </div>
+            )}
           </div>
 
         </div>

@@ -29,14 +29,19 @@ const pageModules = import.meta.glob("./pages/*.jsx", { eager: true })
 const appRoutes = []
 const standaloneRoutes = []
 for (const [filePath, module] of Object.entries(pageModules)) {
-  const route = {
-    path: module.route?.path ?? deriveRouteFromFilename(filePath),
-    Component: module.default,
-  }
+  const Component = module.default
+  const isPublic = module.route?.public === true
+  
   if (module.route?.layout === "app") {
-    appRoutes.push(route)
+    appRoutes.push({
+      path: module.route?.path ?? deriveRouteFromFilename(filePath),
+      element: isPublic ? <Component /> : <RequireAuth><Component /></RequireAuth>,
+    })
   } else {
-    standaloneRoutes.push(route)
+    standaloneRoutes.push({
+      path: module.route?.path ?? deriveRouteFromFilename(filePath),
+      Component,
+    })
   }
 }
 
@@ -44,11 +49,9 @@ const router = createBrowserRouter([
   ...standaloneRoutes,
   {
     element: (
-      <RequireAuth>
-        <WalletProvider>
-          <AppLayout />
-        </WalletProvider>
-      </RequireAuth>
+      <WalletProvider>
+        <AppLayout />
+      </WalletProvider>
     ),
     children: [
       ...appRoutes,

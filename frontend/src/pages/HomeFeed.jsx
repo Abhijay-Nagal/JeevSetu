@@ -6,7 +6,7 @@ import { api } from "../lib/api";
 import ShinyText from "../components/ui/ShinyText";
 import SplitText from "../components/ui/SplitText";
 
-export const route = { layout: "app", path: "/home" };
+export const route = { layout: "app", path: "/home", public: true };
 
 const Page = React.forwardRef((props, ref) => {
   return (
@@ -79,7 +79,7 @@ export default function HomeFeed() {
                   <SplitText text="Bridging People & Wildlife" />
                 </h1>
                 <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
-                  India is home to extraordinary biodiversity — from Himalayan forests to coastal wetlands, grasslands, deserts and urban ecosystems.
+                  India is home to extraordinary biodiversity from Himalayan forests to coastal wetlands, grasslands, deserts and urban ecosystems.
                 </p>
                 <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
                   But protecting this natural heritage isn't the responsibility of scientists and conservationists alone.
@@ -227,7 +227,7 @@ export default function HomeFeed() {
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
                 <p className="text-sm opacity-90 leading-relaxed mb-4">
-                  Wildlife doesn't exist in isolation — and neither does conservation.
+                  Wildlife doesn't exist in isolation and neither does conservation.
                 </p>
                 <p className="text-sm opacity-90 leading-relaxed mb-6">
                   Connect with people who share your interests, exchange knowledge, discover local initiatives and take action together.
@@ -314,7 +314,7 @@ export default function HomeFeed() {
                 </div>
 
                 <p className="text-[10px] font-semibold opacity-50 text-center mt-auto tracking-widest uppercase shrink-0">
-                  JeevSetu — Bridging People & Wildlife
+                  JeevSetu Bridging People & Wildlife
                 </p>
               </div>
             </div>

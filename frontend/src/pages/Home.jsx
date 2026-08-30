@@ -91,7 +91,7 @@ export default function Home() {
                   <SplitText text="Bridging People & Wildlife" />
                 </h1>
                 <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
-                  India is home to extraordinary biodiversity — from Himalayan forests to coastal wetlands, grasslands, deserts and urban ecosystems.
+                  India is home to extraordinary biodiversity from Himalayan forests to coastal wetlands, grasslands, deserts and urban ecosystems.
                 </p>
                 <p className="text-sm opacity-90 mb-3 px-2 leading-relaxed">
                   But protecting this natural heritage isn't the responsibility of scientists and conservationists alone.
@@ -214,17 +214,17 @@ export default function Home() {
                 <div className="bg-white/10 p-3 rounded-xl border border-white/5">
                   <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🐦 Citizen Science</h3>
                   <p className="text-xs opacity-70 leading-relaxed mb-2">Help collect observations and biodiversity data that can contribute to conservation research.</p>
-                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Citizen Science →</Link>
+                  <Link to="/explore-communities" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Citizen Science →</Link>
                 </div>
                 <div className="bg-white/10 p-3 rounded-xl border border-white/5">
                   <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🌿 Volunteer</h3>
                   <p className="text-xs opacity-70 leading-relaxed mb-2">Give your time and skills to conservation programmes, education and outreach.</p>
-                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Find Opportunities →</Link>
+                  <Link to="/explore-communities" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Find Opportunities →</Link>
                 </div>
                 <div className="bg-white/10 p-3 rounded-xl border border-white/5">
                   <h3 className="font-bold text-sm flex items-center gap-2 mb-1">🎓 Learn</h3>
                   <p className="text-xs opacity-70 leading-relaxed mb-2">Join nature trails, workshops and courses to build your understanding of biodiversity.</p>
-                  <Link to="/signup" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Learning →</Link>
+                  <Link to="/chatbot" className="text-xs font-semibold text-[#F4C430] hover:underline relative z-50 inline-block">Explore Learning →</Link>
                 </div>
               </div>
             </div>
@@ -239,7 +239,7 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
                 <p className="text-sm opacity-90 leading-relaxed mb-4">
-                  Wildlife doesn't exist in isolation — and neither does conservation.
+                  Wildlife doesn't exist in isolation and neither does conservation.
                 </p>
                 <p className="text-sm opacity-90 leading-relaxed mb-6">
                   Connect with people who share your interests, exchange knowledge, discover local initiatives and take action together.
@@ -250,7 +250,7 @@ export default function Home() {
                   <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🐘 Wildlife Conservation</span>
                   <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-medium">🌊 Marine Conservation</span>
                 </div>
-                <Link to="/signup" className="mt-auto flex justify-center items-center gap-2 w-full rounded-xl bg-[#F4C430] border border-[#F4C430]/20 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg shrink-0">
+                <Link to="/explore-communities" className="mt-auto flex justify-center items-center gap-2 w-full rounded-xl bg-[#F4C430] border border-[#F4C430]/20 py-3 text-[#0B3D2E] font-bold hover:bg-[#F4C430]/90 transition shadow-lg shrink-0">
                   Explore Communities <ArrowRight size={16} />
                 </Link>
               </div>
@@ -286,7 +286,7 @@ export default function Home() {
                 <div className="bg-white/10 p-4 rounded-xl border border-white/5 mt-auto relative z-50 shrink-0">
                   <h3 className="font-bold text-sm mb-1 text-[#F4C430]">My Submissions</h3>
                   <p className="text-xs opacity-80 leading-relaxed mb-3">Keep track of the observations, reports and contributions you've made through JeevSetu.</p>
-                  <Link to="/signup" className="text-xs font-bold hover:underline flex items-center text-[#F4C430] w-fit">View My Submissions <ArrowRight size={12} className="ml-1" /></Link>
+                  <Link to="/submissions" className="text-xs font-bold hover:underline flex items-center text-[#F4C430] w-fit">View My Submissions <ArrowRight size={12} className="ml-1" /></Link>
                 </div>
               </div>
             </div>
@@ -315,18 +315,18 @@ export default function Home() {
                 </p>
 
                 <div className="flex flex-col gap-3 mb-6 relative z-50 shrink-0">
-                  <Link to="/signup" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
+                  <Link to="/explore-communities" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
                     <div className="bg-[#F4C430] text-[#0B3D2E] p-2 rounded-lg"><Users size={18} /></div>
                     <span className="font-bold text-sm">Explore Communities</span>
                   </Link>
-                  <Link to="/signup" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
+                  <Link to="/chatbot" className="flex items-center gap-3 bg-white/10 p-3 rounded-xl border border-white/5 hover:bg-white/20 transition shadow-sm">
                     <div className="bg-[#F4C430] text-[#0B3D2E] p-2 rounded-lg"><MessageCircle size={18} /></div>
                     <span className="font-bold text-sm">Ask JeevSetu</span>
                   </Link>
                 </div>
 
                 <p className="text-[10px] font-semibold opacity-50 text-center mt-auto tracking-widest uppercase shrink-0">
-                  JeevSetu — Bridging People & Wildlife
+                  JeevSetu Bridging People & Wildlife
                 </p>
               </div>
             </div>
