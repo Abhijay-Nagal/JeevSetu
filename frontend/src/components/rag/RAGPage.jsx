@@ -82,7 +82,7 @@ export default function RAGPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-2 bg-[#0B3D2E]/5 p-2 overflow-x-auto hide-scrollbar">
+      <div className="flex flex-col sm:flex-row gap-2 bg-[#0B3D2E]/5 p-2 overflow-x-auto hide-scrollbar">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
