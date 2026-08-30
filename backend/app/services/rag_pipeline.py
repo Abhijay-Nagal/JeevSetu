@@ -39,7 +39,7 @@ def get_groq_client() -> Groq:
 
 
 def get_embedding(text: str) -> list[float]:
-    api_url = f"https://router.huggingface.co/hf-inference/pipeline/feature-extraction/{EMBEDDING_MODEL_NAME}"
+    api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{EMBEDDING_MODEL_NAME}"
     settings = get_settings()
     headers = {"Authorization": f"Bearer {settings.hf_token}"} if settings.hf_token else {}
     
