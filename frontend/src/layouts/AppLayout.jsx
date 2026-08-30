@@ -80,7 +80,7 @@ function AppLayout() {
       <aside className={`fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9] z-50 transform transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-full flex-col p-6 overflow-y-auto">
 
-          <div className="mb-6 flex flex-col items-center shrink-0">
+          <div className="mb-6 flex flex-col items-center shrink-0 pt-8 md:pt-0">
             <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="mb-2 w-48 h-auto" />
             <h1 className="sr-only">
               JeevSetu

@@ -169,9 +169,13 @@ export default function ExploreCommunities() {
         </Dialog>
       </div>
 
+      {error && !isDialogOpen && (
+        <p className="text-sm text-red-600 mb-4 bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>
+      )}
+
       {loading ? (
         <p className="opacity-60">Loading communities...</p>
-      ) : filteredCommunities.length === 0 ? (
+      ) : error ? null : filteredCommunities.length === 0 ? (
         <p className="opacity-60">No communities found.</p>
       ) : (
         <AnimatedList className="space-y-3 relative z-10" displayScrollbar={false}>
