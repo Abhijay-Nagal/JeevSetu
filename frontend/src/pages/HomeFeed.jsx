@@ -338,9 +338,10 @@ export default function HomeFeed() {
           
           {/* Page 16 - Back Cover */}
           <Page bookRef={bookRef}>
-             <div className="flex flex-col items-center justify-center h-full opacity-30">
-               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-24 h-auto brightness-0 invert mb-4" />
-               <p className="text-xs font-semibold">© 2026 JeevSetu</p>
+             <div className="flex flex-col items-center justify-center h-full">
+               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-40 h-auto brightness-0 invert mb-6 opacity-90 drop-shadow-md" />
+               <p className="text-sm font-bold text-[#F4C430] tracking-widest uppercase mb-1">JeevSetu</p>
+               <p className="text-[10px] font-medium opacity-70">© 2026 All Rights Reserved</p>
              </div>
           </Page>
         </HTMLFlipBook>
