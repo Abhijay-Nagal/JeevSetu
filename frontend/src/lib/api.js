@@ -46,14 +46,14 @@ export const api = {
   addComment: (id, content) =>
     request(`/observations/${id}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
   searchKnowledgeHub: (query, limit = 10) =>
-    request("/api/search", { method: "POST", body: JSON.stringify({ query, limit }) }),
+    request("/search", { method: "POST", body: JSON.stringify({ query, limit }) }),
   getNextSteps: (currentResource, userInterests = []) =>
-    request("/api/next-steps", {
+    request("/next-steps", {
       method: "POST",
       body: JSON.stringify({ current_resource: currentResource, user_interests: userInterests }),
     }),
   getQuiz: (topic, numQuestions = 5) =>
-    request("/api/quiz", { method: "POST", body: JSON.stringify({ topic, num_questions: numQuestions }) }),
+    request("/quiz", { method: "POST", body: JSON.stringify({ topic, num_questions: numQuestions }) }),
   getWallet: () => request("/rewards/wallet"),
   sendConfirmationEmail: (userId, email, name) =>
     request("/auth/send-confirmation", {

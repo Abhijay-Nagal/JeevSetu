@@ -10,8 +10,7 @@ from app.models.schema import (
 )
 from app.services import rag_pipeline
 
-router = APIRouter(prefix="/api", tags=["rag"])
-
+router = APIRouter(tags=["rag"])
 
 @router.post("/search", response_model=SearchResponse)
 async def search(body: SearchQuery):

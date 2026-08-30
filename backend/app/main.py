@@ -35,12 +35,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-app.include_router(auth_email.router)
-app.include_router(communities.router)
-app.include_router(community.router)
-app.include_router(rag.router)
-app.include_router(research.router)
-app.include_router(rewards.router)
+app.include_router(auth_email.router, prefix="/api")
+app.include_router(communities.router, prefix="/api")
+app.include_router(community.router, prefix="/api")
+app.include_router(rag.router, prefix="/api")
+app.include_router(research.router, prefix="/api")
+app.include_router(rewards.router, prefix="/api")
 
 
 @app.get("/health")
