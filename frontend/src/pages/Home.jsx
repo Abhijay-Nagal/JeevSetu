@@ -284,7 +284,7 @@ export default function Home() {
           </Page>,
 
           /* Page 12 - Left Illustration (Action) */
-          <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />,
+          !isMobile && <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />,
 
           /* Page 13 - From Interest to Action */
           <Page number="6" bookRef={bookRef}>
@@ -319,7 +319,7 @@ export default function Home() {
           </Page>,
 
           /* Page 14 - Left Illustration (Final) */
-          <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />,
+          !isMobile && <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />,
 
           /* Page 15 - Your JeevSetu */
           <Page number="7" bookRef={bookRef}>
