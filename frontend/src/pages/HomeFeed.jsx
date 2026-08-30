@@ -78,6 +78,8 @@ export default function HomeFeed() {
           useMouseEvents={true}
           usePortrait={true}
         >
+          {[
+
           <Page bookRef={bookRef}>
             <div className="flex flex-col items-center justify-between h-full p-6 text-center">
               <div className="flex-1 flex items-center justify-center w-full">
@@ -92,7 +94,7 @@ export default function HomeFeed() {
                 </p>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */}
           <Page bookRef={bookRef}>
@@ -119,10 +121,10 @@ export default function HomeFeed() {
                 Begin the Journey <ArrowRight size={18} />
               </button>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 2 - Left Illustration (BNHS) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />}
+          {!isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />},
 
           {/* Page 3 - Who is BNHS? */}
           <Page number="1" bookRef={bookRef}>
@@ -144,10 +146,10 @@ export default function HomeFeed() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 4 - Left Illustration (Research) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />}
+          {!isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />},
 
           {/* Page 5 - What Does BNHS Actually Do? */}
           <Page number="2" bookRef={bookRef}>
@@ -184,10 +186,10 @@ export default function HomeFeed() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 6 - Left Illustration (Volunteer) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />}
+          {!isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />},
 
           {/* Page 7 - Conservation Isn't Just About Scientists */}
           <Page number="3" bookRef={bookRef}>
@@ -213,10 +215,10 @@ export default function HomeFeed() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 8 - Left Illustration (Citizen Science) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />}
+          {!isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />},
 
           {/* Page 9 - Find Your Way to Contribute */}
           <Page number="4" bookRef={bookRef}>
@@ -240,10 +242,10 @@ export default function HomeFeed() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 10 - Left Illustration (Community) */}
-          {!isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />}
+          {!isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />},
 
           {/* Page 11 - Meet the Community */}
           <Page number="5" bookRef={bookRef}>
@@ -267,7 +269,7 @@ export default function HomeFeed() {
                 </Link>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 12 - Left Illustration (Action) */}
           <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />
@@ -302,7 +304,7 @@ export default function HomeFeed() {
                 </div>
               </div>
             </div>
-          </Page>
+          </Page>,
 
           {/* Page 14 - Left Illustration (Final) */}
           <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />
@@ -342,7 +344,7 @@ export default function HomeFeed() {
                 </p>
               </div>
             </div>
-          </Page>
+          </Page>,
           
           {/* Page 16 - Back Cover */}
           <Page bookRef={bookRef}>
@@ -351,7 +353,9 @@ export default function HomeFeed() {
                <p className="text-sm font-bold text-[#F4C430] tracking-widest uppercase mb-1">JeevSetu</p>
                <p className="text-[10px] font-medium opacity-70">© 2026 All Rights Reserved</p>
              </div>
-          </Page>
+          </Page>,
+        
+          ].filter(Boolean)}
         </HTMLFlipBook>
       </div>
       
