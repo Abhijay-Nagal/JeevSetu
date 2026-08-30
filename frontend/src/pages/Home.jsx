@@ -77,13 +77,25 @@ export default function Home() {
         <HTMLFlipBook 
           width={320} 
           height={450} 
-          showCover={true}
+          showCover={false}
           className="mx-auto shadow-2xl drop-shadow-2xl book-container"
           ref={bookRef}
           useMouseEvents={true}
         >
-          {/* Page 1 - Cover Illustration (Left) */}
-          <Page imagePage={true} imageSrc="/book/cover.jpg" bookRef={bookRef} />
+          {/* Page 1 - Title Page / Copyright (Left) */}
+          <Page bookRef={bookRef}>
+            <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+              <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-24 h-auto mx-auto brightness-0 invert mb-8 opacity-80" />
+              <div className="mt-auto mb-4 text-[10px] space-y-2 opacity-50 font-medium">
+                <p>Published by JeevSetu Conservation Initiative</p>
+                <p>First Edition, 2026</p>
+                <p>© All Rights Reserved</p>
+                <p className="pt-4 border-t border-white/20 mt-4 max-w-[200px] mx-auto">
+                  Dedicated to the incredible biodiversity of India and those who protect it.
+                </p>
+              </div>
+            </div>
+          </Page>
 
           {/* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */}
           <Page bookRef={bookRef}>
