@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBook from "react-pageflip";
 import { Link } from "react-router-dom";
 import { Leaf, Users, MessageCircle, FileText, Globe, Search, ArrowRight, BookOpen, Camera, Shield } from "lucide-react";
