@@ -16,8 +16,13 @@ export function AuthProvider({ children }) {
       window.history.replaceState(null, "", window.location.pathname);
     }
 
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
+      setSession(data?.session ?? null);
       setLoading(false);
     });
 
@@ -25,14 +30,14 @@ export function AuthProvider({ children }) {
       setSession(newSession);
     });
 
-    return () => listener.subscription.unsubscribe();
+    return () => listener?.subscription?.unsubscribe();
   }, []);
 
   const value = {
     session,
     user: session?.user ?? null,
     loading,
-    signOut: () => supabase.auth.signOut(),
+    signOut: () => supabase?.auth?.signOut(),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
