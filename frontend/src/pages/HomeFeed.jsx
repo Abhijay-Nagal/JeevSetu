@@ -81,19 +81,40 @@ export default function HomeFeed() {
           {[
 
           <Page bookRef={bookRef}>
-            <div className="flex flex-col items-center justify-between h-full p-6 text-center">
-              <div className="flex-1 flex items-center justify-center w-full">
-                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-5/6 max-w-[280px] h-auto brightness-0 invert opacity-80 drop-shadow-lg" />
+            {isMobile ? (
+              <div className="flex flex-col items-center justify-center h-full p-4 bg-[#0B3D2E]">
+                <div className="w-full h-full border-[3px] border-[#F4C430]/70 rounded-md p-2 relative shadow-inner">
+                  <div className="w-full h-full border border-[#F4C430]/40 rounded-sm flex flex-col items-center justify-center relative overflow-hidden bg-[#0a3125]">
+                    <div className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-[#F4C430]/60"></div>
+                    <div className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-[#F4C430]/60"></div>
+                    <div className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-[#F4C430]/60"></div>
+                    <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-[#F4C430]/60"></div>
+                    
+                    <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-44 h-auto brightness-0 invert mb-10 drop-shadow-2xl z-10 opacity-90" />
+                    
+                    <h1 className="text-[#F4C430] font-serif text-3xl font-bold tracking-widest uppercase mb-3 drop-shadow-md">JeevSetu</h1>
+                    <div className="h-px w-24 bg-[#F4C430]/50 mb-3 shadow-[0_0_8px_rgba(244,196,48,0.5)]"></div>
+                    <p className="text-[#F8F6E9]/90 text-xs tracking-widest uppercase text-center font-medium px-4 leading-relaxed">
+                      Bridging People<br/>& Wildlife
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-auto pt-6 text-[10px] space-y-2 opacity-50 font-medium shrink-0">
-                <p>Published by JeevSetu Conservation Initiative</p>
-                <p>First Edition, 2026</p>
-                <p>© All Rights Reserved</p>
-                <p className="pt-4 border-t border-white/20 mt-4 max-w-[200px] mx-auto">
-                  Dedicated to the incredible biodiversity of India and those who protect it.
-                </p>
+            ) : (
+              <div className="flex flex-col items-center justify-between h-full p-6 text-center">
+                <div className="flex-1 flex items-center justify-center w-full">
+                  <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-5/6 max-w-[280px] h-auto brightness-0 invert opacity-80 drop-shadow-lg" />
+                </div>
+                <div className="mt-auto pt-6 text-[10px] space-y-2 opacity-50 font-medium shrink-0">
+                  <p>Published by JeevSetu Conservation Initiative</p>
+                  <p>First Edition, 2026</p>
+                  <p>© All Rights Reserved</p>
+                  <p className="pt-4 border-t border-white/20 mt-4 max-w-[200px] mx-auto">
+                    Dedicated to the incredible biodiversity of India and those who protect it.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </Page>,
 
           /* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */
