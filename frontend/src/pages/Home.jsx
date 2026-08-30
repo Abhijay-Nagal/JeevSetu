@@ -81,6 +81,7 @@ export default function Home() {
           className="mx-auto shadow-2xl drop-shadow-2xl book-container"
           ref={bookRef}
           useMouseEvents={true}
+          usePortrait={true}
         >
           <Page bookRef={bookRef}>
             <div className="flex flex-col items-center justify-between h-full p-6 text-center">
