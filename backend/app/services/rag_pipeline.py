@@ -1,18 +1,16 @@
 """End-to-end RAG pipeline.
 
-Embeddings: local sentence-transformers (no API key, no per-call cost/rate
-limit) -- must stay in sync with the model used in scripts/build_embeddings.py
-and the vector(768) column in document_chunks.
+Search: Supabase PostgreSQL full-text search (to_tsvector / plainto_tsquery).
+No external embedding API needed -- works everywhere without DNS or token issues.
 
 Generation (next-steps, quiz): Groq's OpenAI-compatible chat completions API,
-in JSON mode, grounded in chunks retrieved via the match_documents RPC.
+in JSON mode, grounded in chunks retrieved via the search_documents_text RPC.
 """
 
 import json
 from functools import lru_cache
 
 from groq import Groq
-import requests
 
 from app.core.config import get_settings
 from app.core.supabase_client import get_supabase
@@ -26,7 +24,6 @@ from app.models.schema import (
     SearchResultCard,
 )
 
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 GROQ_MODEL = "openai/gpt-oss-120b"
 
 
@@ -36,25 +33,6 @@ def get_groq_client() -> Groq:
     if not settings.groq_api_key:
         raise ValueError("GROQ_API_KEY is missing -- set it in .env")
     return Groq(api_key=settings.groq_api_key)
-
-
-def get_embedding(text: str) -> list[float]:
-    api_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{EMBEDDING_MODEL_NAME}"
-    settings = get_settings()
-    headers = {"Authorization": f"Bearer {settings.hf_token}"} if settings.hf_token else {}
-    
-    response = requests.post(
-        api_url,
-        headers=headers,
-        json={"inputs": [text], "options": {"wait_for_model": True}},
-        timeout=15,
-    )
-    
-    if response.status_code != 200:
-        # Fallback to Jina if HF is down or rate limits (only for demonstration, but Jina requires key usually. Here we just error)
-        raise RuntimeError(f"Hugging Face API failed ({response.status_code}): {response.text}")
-        
-    return response.json()[0]
 
 
 def _generate_json(system: str, prompt: str) -> dict:
@@ -76,22 +54,22 @@ def _generate_json(system: str, prompt: str) -> dict:
 
 
 def _retrieve_context(query: str, match_count: int = 5) -> list[dict]:
+    """Full-text search via Supabase RPC -- no external API needed."""
     supabase = get_supabase()
-    embedding = get_embedding(query)
     response = supabase.rpc(
-        "match_documents",
-        {"query_embedding": embedding, "match_threshold": 0.15, "match_count": match_count},
+        "search_documents_text",
+        {"search_query": query, "match_count": match_count},
     ).execute()
     return response.data or []
 
 
 def search_resources(body: SearchQuery) -> SearchResponse:
-    """Semantic search over BNHS content via match_documents."""
+    """Full-text search over BNHS content via search_documents_text."""
     matches = _retrieve_context(body.query, match_count=body.limit)
     results = [
         SearchResultCard(
-            id=row.get("id"),
-            title=row.get("title") or "",
+            id=row.get("doc_id"),
+            title=row.get("doc_title") or "",
             summary=row.get("summary"),
             content_type=row.get("content_type"),
             source=row.get("source"),
@@ -136,7 +114,7 @@ def get_quiz(body: QuizQuery) -> QuizResponse:
     """RAG-grounded multiple-choice quiz generation."""
     matches = _retrieve_context(body.topic, match_count=5)
     if matches:
-        context_text = "\n\n".join(f"[{row.get('content_type')}] {row.get('title')}: {row.get('summary')}" for row in matches)
+        context_text = "\n\n".join(f"[{row.get('content_type')}] {row.get('doc_title')}: {row.get('summary')}" for row in matches)
     else:
         context_text = "No specific BNHS documents matched this topic -- use general Indian wildlife conservation knowledge."
 
