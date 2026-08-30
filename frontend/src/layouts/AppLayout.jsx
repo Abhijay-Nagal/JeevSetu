@@ -64,8 +64,10 @@ function AppLayout() {
       </div>
 
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between bg-[#0B3D2E] text-[#F8F6E9] h-14 px-4 z-40 fixed top-0 w-full shadow-md">
-         <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="w-24 h-auto brightness-0 invert" />
+      <div className="md:hidden flex items-center justify-between bg-[#0B3D2E] text-[#F8F6E9] h-16 px-4 z-40 fixed top-0 w-full shadow-md">
+         <span className="font-serif font-bold text-2xl tracking-wide ml-2">
+           <span className="text-white">Jeev</span><span className="text-[#6ab457]">Setu</span>
+         </span>
          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1">
            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
          </button>
@@ -80,7 +82,7 @@ function AppLayout() {
       <aside className={`fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9] z-50 transform transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-full flex-col p-6 overflow-y-auto">
 
-          <div className="mb-6 flex flex-col items-center shrink-0">
+          <div className="mb-6 flex flex-col items-center shrink-0 pt-8 md:pt-0">
             <img src="/jeevsetu-logo.png" alt="JeevSetu Logo" className="mb-2 w-48 h-auto" />
             <h1 className="sr-only">
               JeevSetu
