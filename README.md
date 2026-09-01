@@ -1,4 +1,4 @@
-# JeevSetu — Bridging People & Wildlife
+# JeevSetu: Bridging People & Wildlife
 
 A digital hub built for **BNHS (Bombay Natural History Society)** as part
 of Code for Good 2026 (Bengaluru) — Challenge 1: *Engagement and
