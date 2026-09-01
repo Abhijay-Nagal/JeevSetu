@@ -13,19 +13,19 @@ online, without building another flora/fauna photo-ID app.
 
 ## Features
 
-- **Knowledge Hub** — semantic search + AI chatbot grounded in BNHS's real
+- **Knowledge Hub**: semantic search + AI chatbot grounded in BNHS's real
   archive (species records, JBNHS journal, Hornbill editions, field
   guides, blog posts, newsletters), with cited sources and AI-generated
   "next steps" pointing to real BNHS actions (membership, camps, donate).
-- **Community Engagement** — post observations, join/create communities,
+- **Community Engagement**: post observations, join/create communities,
   like and comment on posts, with a global broadcast option for
   announcements that show up everywhere.
-- **Rewards & Gamification** — a daily AI-generated quiz question with
+- **Rewards & Gamification**: a daily AI-generated quiz question with
   streaks and freezes, plus coins for posting, getting liked, and
   joining/creating communities.
-- **Publications** — research enthusiasts submit findings, automatically
+- **Publications**: research enthusiasts submit findings, automatically
   checked against BNHS's existing knowledge base first.
-- **Email confirmation** — a branded, NGO-styled confirmation email sent
+- **Email confirmation**: a branded, NGO-styled confirmation email sent
   via the project's own SMTP, independent of Supabase's default mailer.
 
 See [`docs/plan.md`](docs/plan.md) for the reward system design,
