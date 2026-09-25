@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react"
 import { api } from "../lib/api"
+import { useWallet } from "../context/WalletContext"
 import CommunityCard from "../components/community/CommunityCard"
 import CommunityDetail from "../components/community/CommunityDetail"
 import { Button } from "../components/ui/button"
@@ -19,6 +20,7 @@ import ShinyText from "../components/ui/ShinyText"
 export const route = { layout: "app" }
 
 export default function ExploreCommunities() {
+  const { refreshWallet } = useWallet()
   const [communities, setCommunities] = useState([])
   const [myCommunityIds, setMyCommunityIds] = useState(new Set())
   const [selected, setSelected] = useState(null)
@@ -61,6 +63,7 @@ export default function ExploreCommunities() {
       setCommunities((prev) => [community, ...prev])
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
       setIsDialogOpen(false)
+      refreshWallet()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -73,8 +76,10 @@ export default function ExploreCommunities() {
     try {
       await api.joinCommunity(community.slug)
       setMyCommunityIds((prev) => new Set(prev).add(community.id))
+      refreshWallet()
     } catch (err) {
       setError(err.message)
+      throw err
     }
   }
 
@@ -89,6 +94,7 @@ export default function ExploreCommunities() {
       })
     } catch (err) {
       setError(err.message)
+      throw err
     }
   }
 
@@ -100,7 +106,15 @@ export default function ExploreCommunities() {
   }, [communities, myCommunityIds, searchQuery])
 
   if (selected) {
-    return <CommunityDetail community={selected} onBack={() => setSelected(null)} />
+    return (
+      <CommunityDetail
+        community={selected}
+        onBack={() => setSelected(null)}
+        isMember={myCommunityIds.has(selected.id)}
+        onJoin={handleJoin}
+        onLeave={handleLeave}
+      />
+    )
   }
 
   return (
@@ -176,7 +190,13 @@ export default function ExploreCommunities() {
       {loading ? (
         <p className="opacity-60">Loading communities...</p>
       ) : error ? null : filteredCommunities.length === 0 ? (
-        <p className="opacity-60">No communities found.</p>
+        <p className="opacity-60 text-[#0B3D2E]">
+          {searchQuery.trim()
+            ? `No communities match "${searchQuery.trim()}".`
+            : communities.length === 0
+              ? "No communities yet -- create the first one."
+              : "You've joined every community here. Create a new one to keep going."}
+        </p>
       ) : (
         <AnimatedList className="space-y-3 relative z-10" displayScrollbar={false}>
           {filteredCommunities.map((community) => (

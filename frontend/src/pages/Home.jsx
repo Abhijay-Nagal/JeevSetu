@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import HTMLFlipBook from "react-pageflip";
 import { Link, Navigate } from "react-router-dom";
-import { Leaf, Users, MessageCircle, FileText, Globe, Search, ArrowRight, BookOpen, Camera, Shield } from "lucide-react";
+import { Users, MessageCircle, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ShinyText from "../components/ui/ShinyText";
 import SplitText from "../components/ui/SplitText";
@@ -65,6 +65,21 @@ export default function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // The book already flips on drag and on a click in the page margins; arrow
+  // keys give the same control to anyone who isn't using a mouse.
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const tag = event.target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || event.target?.isContentEditable) return;
+
+      if (event.key === "ArrowRight") bookRef.current?.pageFlip()?.flipNext();
+      else if (event.key === "ArrowLeft") bookRef.current?.pageFlip()?.flipPrev();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (loading) return null;
   if (user) return <Navigate to="/home" replace />;
 
@@ -92,7 +107,7 @@ export default function Home() {
         >
           {[
 
-          <Page bookRef={bookRef}>
+          <Page key="cover" bookRef={bookRef}>
             {isMobile ? (
               <div className="flex flex-col items-center justify-center h-full p-4 bg-[#0B3D2E]">
                 <div className="w-full h-full border-[3px] border-[#F4C430]/70 rounded-md p-2 relative shadow-inner">
@@ -130,7 +145,7 @@ export default function Home() {
           </Page>,
 
           /* Page 2 - Cover Title (Welcome to JeevSetu) (Right) */
-          <Page bookRef={bookRef}>
+          <Page key="intro" bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-20 h-auto mx-auto mb-4 brightness-0 invert shrink-0" />
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col w-full text-center">
@@ -157,10 +172,10 @@ export default function Home() {
           </Page>,
 
           /* Page 2 - Left Illustration (BNHS) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-bnhs" imagePage={true} imageSrc="/book/bnhs.jpg" bookRef={bookRef} />,
 
           /* Page 3 - Who is BNHS? */
-          <Page number="1" bookRef={bookRef}>
+          <Page key="page-1" number="1" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="Meet BNHS" /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 pb-4">
@@ -182,10 +197,10 @@ export default function Home() {
           </Page>,
 
           /* Page 4 - Left Illustration (Research) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-research" imagePage={true} imageSrc="/book/research.jpg" bookRef={bookRef} />,
 
           /* Page 5 - What Does BNHS Actually Do? */
-          <Page number="2" bookRef={bookRef}>
+          <Page key="page-2" number="2" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="From Research to Conservation" /></h2>
               <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pb-2 pr-1">
@@ -222,10 +237,10 @@ export default function Home() {
           </Page>,
 
           /* Page 6 - Left Illustration (Volunteer) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-volunteer" imagePage={true} imageSrc="/book/volunteer.jpg" bookRef={bookRef} />,
 
           /* Page 7 - Conservation Isn't Just About Scientists */
-          <Page number="3" bookRef={bookRef}>
+          <Page key="page-3" number="3" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F8F6E9] leading-tight">You Can Be Part of <br/><ShinyText text="Conservation" /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
@@ -251,10 +266,10 @@ export default function Home() {
           </Page>,
 
           /* Page 8 - Left Illustration (Citizen Science) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-citizen" imagePage={true} imageSrc="/book/citizen.jpg" bookRef={bookRef} />,
 
           /* Page 9 - Find Your Way to Contribute */
-          <Page number="4" bookRef={bookRef}>
+          <Page key="page-4" number="4" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-xl font-bold mb-4 text-[#F4C430]"><ShinyText text="How Can You Contribute?" /></h2>
               <div className="space-y-3 overflow-y-auto no-scrollbar flex-1 pb-2 pr-1">
@@ -278,10 +293,10 @@ export default function Home() {
           </Page>,
 
           /* Page 10 - Left Illustration (Community) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-community" imagePage={true} imageSrc="/book/community.jpg" bookRef={bookRef} />,
 
           /* Page 11 - Meet the Community */
-          <Page number="5" bookRef={bookRef}>
+          <Page key="page-5" number="5" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430] leading-tight"><ShinyText text="Conservation Works Better Together" /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
@@ -305,10 +320,10 @@ export default function Home() {
           </Page>,
 
           /* Page 12 - Left Illustration (Action) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-action" imagePage={true} imageSrc="/book/action.jpg" bookRef={bookRef} />,
 
           /* Page 13 - From Interest to Action */
-          <Page number="6" bookRef={bookRef}>
+          <Page key="page-6" number="6" bookRef={bookRef}>
             <div className="flex flex-col h-full">
               <h2 className="text-2xl font-bold mb-4 text-[#F4C430]"><ShinyText text="See Something? Do Something." /></h2>
               <div className="overflow-y-auto no-scrollbar flex-1 flex flex-col">
@@ -340,10 +355,10 @@ export default function Home() {
           </Page>,
 
           /* Page 14 - Left Illustration (Final) */
-          !isMobile && <Page imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />,
+          !isMobile && <Page key="illustration-final" imagePage={true} imageSrc="/book/final.jpg" bookRef={bookRef} />,
 
           /* Page 15 - Your JeevSetu */
-          <Page number="7" bookRef={bookRef}>
+          <Page key="page-7" number="7" bookRef={bookRef}>
             <div className="flex flex-col h-full py-2">
               <h2 className="text-2xl font-bold mb-6 text-[#F8F6E9] leading-tight">
                 Your Connection to Wildlife <br/><ShinyText text="Starts Here." />
@@ -380,7 +395,7 @@ export default function Home() {
           </Page>,
           
           /* Page 16 - Back Cover */
-          <Page bookRef={bookRef}>
+          <Page key="back-cover" bookRef={bookRef}>
              <div className="flex flex-col items-center justify-center h-full">
                <img src="/jeevsetu-logo.png" alt="JeevSetu" className="w-40 h-auto brightness-0 invert mb-6 opacity-90 drop-shadow-md" />
                <p className="text-sm font-bold text-[#F4C430] tracking-widest uppercase mb-1">JeevSetu</p>

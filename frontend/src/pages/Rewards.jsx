@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Coins, ArrowUpRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2, CreditCard } from "lucide-react"
+import { Coins, ArrowUpRight, ArrowDownRight, Flame, Snowflake, CheckCircle2, XCircle, Loader2, CreditCard } from "lucide-react"
 import { api } from "../lib/api"
 import { useWallet } from "../context/WalletContext"
+import { formatRelativeTime } from "../lib/utils"
+import { myCards } from "../data/cards"
 
 export const route = { path: "/rewards", layout: "app" }
 
@@ -88,7 +90,7 @@ function DailyQuestionCard({ onAnswered }) {
 
       {alreadyAnswered ? (
         <p className="text-[#0B3D2E]/60 py-4">
-          You've already answered today's question come back tomorrow to keep your streak alive.
+          You've already answered today's question -- come back tomorrow to keep your streak alive.
         </p>
       ) : (
         <>
@@ -139,7 +141,6 @@ function DailyQuestionCard({ onAnswered }) {
 
 function Rewards() {
   const { wallet, refreshWallet } = useWallet()
-  const [error, setError] = useState("")
   const navigate = useNavigate()
 
   return (
@@ -149,12 +150,6 @@ function Rewards() {
         Earn coins by answering the daily question, keeping your streak alive, and joining in
         with communities. Use your coins to collect cards!
       </p>
-
-      {error && (
-        <div className="mt-6 bg-red-50 text-red-700 p-4 rounded-xl border border-red-100">
-          {error}
-        </div>
-      )}
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <button className="flex items-center gap-4 rounded-2xl bg-[#0B3D2E] text-[#F8F6E9] px-6 py-6 transition hover:bg-[#0B3D2E]/90 hover:-translate-y-1 hover:shadow-md">
@@ -179,7 +174,7 @@ function Rewards() {
           <div className="text-left flex-1">
             <p className="text-sm font-semibold text-[#0B3D2E]/60 uppercase tracking-wider">My Cards</p>
             <p className="text-3xl font-bold">
-              3
+              {myCards.length}
             </p>
           </div>
         </button>
@@ -196,23 +191,35 @@ function Rewards() {
         </p>
       )}
       <div className="space-y-2">
-        {wallet?.recent_transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="flex items-center justify-between rounded-xl border border-[#0B3D2E]/10 bg-white px-5 py-3.5"
-          >
-            <div className="flex items-center gap-3">
-              <ArrowUpRight size={16} className="text-[#2E7D32]" />
-              <span className="text-sm font-medium">{REASON_LABELS[tx.reason] || tx.reason}</span>
+        {wallet?.recent_transactions.map((tx) => {
+          // Spending on cards writes a negative entry, so the arrow and the
+          // sign follow the amount rather than always reading as an award.
+          const isSpend = tx.amount < 0
+          const Arrow = isSpend ? ArrowDownRight : ArrowUpRight
+          return (
+            <div
+              key={tx.id}
+              className="flex items-center justify-between rounded-xl border border-[#0B3D2E]/10 bg-white px-5 py-3.5"
+            >
+              <div className="flex items-center gap-3">
+                <Arrow size={16} className={isSpend ? "text-[#0B3D2E]/50" : "text-[#2E7D32]"} />
+                <span className="text-sm font-medium">{REASON_LABELS[tx.reason] || tx.reason}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-sm font-bold tabular-nums ${isSpend ? "text-[#0B3D2E]/60" : "text-[#2E7D32]"}`}>
+                  {isSpend ? "" : "+"}{tx.amount}
+                </span>
+                <time
+                  dateTime={tx.created_at}
+                  title={new Date(tx.created_at).toLocaleString()}
+                  className="text-xs text-[#0B3D2E]/40"
+                >
+                  {formatRelativeTime(tx.created_at)}
+                </time>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-[#2E7D32]">+{tx.amount}</span>
-              <span className="text-xs text-[#0B3D2E]/40">
-                {new Date(tx.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

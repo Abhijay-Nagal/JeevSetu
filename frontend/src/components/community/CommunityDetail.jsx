@@ -9,13 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
 import PostCard from "./PostCard";
 import PostComposer from "./PostComposer";
 
 export default function CommunityDetail({ community, onBack, isMember, onJoin, onLeave }) {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [membershipBusy, setMembershipBusy] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,29 +38,29 @@ export default function CommunityDetail({ community, onBack, isMember, onJoin, o
 
   async function loadFeed() {
     setError(null);
+    setLoading(true);
     try {
       const feed = await api.getCommunityFeed(community.slug);
       setPosts(feed);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleJoin() {
+  // Both membership calls award or revoke coins, so block a second click
+  // until the first one has come back.
+  async function changeMembership(action) {
+    if (membershipBusy || !action) return;
     setError(null);
+    setMembershipBusy(true);
     try {
-      await onJoin(community);
+      await action(community);
     } catch (err) {
       setError(err.message);
-    }
-  }
-
-  async function handleLeave() {
-    setError(null);
-    try {
-      await onLeave(community);
-    } catch (err) {
-      setError(err.message);
+    } finally {
+      setMembershipBusy(false);
     }
   }
 
@@ -73,12 +75,20 @@ export default function CommunityDetail({ community, onBack, isMember, onJoin, o
         {community.description && <p className="mt-1 opacity-70">{community.description}</p>}
         <div className="mt-3 flex gap-2">
           {isMember ? (
-            <button onClick={handleLeave} className="rounded-lg border border-[#0B3D2E]/20 px-3 py-1.5 text-sm">
-              Leave
+            <button
+              onClick={() => changeMembership(onLeave)}
+              disabled={membershipBusy}
+              className="rounded-lg border border-[#0B3D2E]/20 px-3 py-1.5 text-sm transition hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {membershipBusy ? "Leaving..." : "Leave"}
             </button>
           ) : (
-            <button onClick={handleJoin} className="rounded-lg bg-[#0B3D2E] px-3 py-1.5 text-sm text-white">
-              Join
+            <button
+              onClick={() => changeMembership(onJoin)}
+              disabled={membershipBusy}
+              className="rounded-lg bg-[#0B3D2E] px-3 py-1.5 text-sm text-white transition hover:bg-[#0B3D2E]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {membershipBusy ? "Joining..." : "Join"}
             </button>
           )}
         </div>
@@ -125,10 +135,23 @@ export default function CommunityDetail({ community, onBack, isMember, onJoin, o
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="space-y-4">
-        {filteredPosts.length === 0 && <p className="opacity-60">No posts found.</p>}
-        {filteredPosts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+        {loading ? (
+          <div className="flex justify-center py-8 text-[#0B3D2E]/40">
+            <Loader2 size={20} className="animate-spin" />
+          </div>
+        ) : (
+          filteredPosts.length === 0 && (
+            <p className="opacity-60">
+              {searchQuery.trim()
+                ? `No posts match "${searchQuery.trim()}".`
+                : isMember
+                  ? "No posts yet -- share the first observation."
+                  : "No posts yet. Join this community to start one."}
+            </p>
+          )
+        )}
+        {!loading &&
+          filteredPosts.map((post) => <PostCard key={post.id} post={post} />)}
       </div>
     </div>
   );

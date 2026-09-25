@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { MessageCircle, Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
+import { formatRelativeTime } from "../../lib/utils";
 
 export default function PostCard({ post }) {
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [liked, setLiked] = useState(post.liked_by_me || false);
   const [busy, setBusy] = useState(false);
+  const [likeError, setLikeError] = useState("");
 
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(null);
@@ -16,10 +18,13 @@ export default function PostCard({ post }) {
 
   async function toggleLike() {
     setBusy(true);
+    setLikeError("");
     try {
       const result = liked ? await api.unlikePost(post.id) : await api.likePost(post.id);
       setLikeCount(result.like_count);
       setLiked(result.liked_by_me);
+    } catch (err) {
+      setLikeError(err.message);
     } finally {
       setBusy(false);
     }
@@ -59,7 +64,10 @@ export default function PostCard({ post }) {
   return (
     <article className="rounded-xl border border-[#0B3D2E]/10 bg-white p-4">
       <p className="text-xs font-medium text-[#0B3D2E]/50 mb-2">
-        {post.author_name || "Someone"} · {new Date(post.created_at).toLocaleDateString()}
+        {post.author_name || "Someone"} ·{" "}
+        <time dateTime={post.created_at} title={new Date(post.created_at).toLocaleString()}>
+          {formatRelativeTime(post.created_at)}
+        </time>
       </p>
       {post.media_url && (
         <img src={post.media_url} alt="" className="mb-3 max-h-80 w-full rounded-lg object-cover" />
@@ -70,7 +78,8 @@ export default function PostCard({ post }) {
         <button
           onClick={toggleLike}
           disabled={busy}
-          className={`rounded-full px-3 py-1 transition ${
+          aria-pressed={liked}
+          className={`rounded-full px-3 py-1 transition disabled:opacity-60 ${
             liked ? "bg-[#F4C430] text-[#0B3D2E]" : "bg-[#0B3D2E]/5 hover:bg-[#0B3D2E]/10"
           }`}
         >
@@ -88,6 +97,8 @@ export default function PostCard({ post }) {
         )}
       </div>
 
+      {likeError && <p className="mt-2 text-xs text-red-600">{likeError}</p>}
+
       {showComments && (
         <div className="mt-3 border-t border-[#0B3D2E]/10 pt-3 space-y-3">
           {loadingComments ? (
@@ -104,9 +115,13 @@ export default function PostCard({ post }) {
               {comments?.map((comment) => (
                 <div key={comment.id} className="text-sm">
                   <span className="font-semibold">{comment.user_name || "Someone"}</span>{" "}
-                  <span className="text-[#0B3D2E]/50 text-xs">
-                    {new Date(comment.created_at).toLocaleDateString()}
-                  </span>
+                  <time
+                    dateTime={comment.created_at}
+                    title={new Date(comment.created_at).toLocaleString()}
+                    className="text-[#0B3D2E]/50 text-xs"
+                  >
+                    {formatRelativeTime(comment.created_at)}
+                  </time>
                   <p className="text-[#0B3D2E]/80">{comment.content}</p>
                 </div>
               ))}

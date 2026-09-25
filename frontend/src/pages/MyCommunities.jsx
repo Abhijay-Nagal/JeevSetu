@@ -38,6 +38,7 @@ export default function MyCommunities() {
       setCommunities((prev) => prev.filter((c) => c.id !== community.id))
     } catch (err) {
       setError(err.message)
+      throw err
     }
   }
 

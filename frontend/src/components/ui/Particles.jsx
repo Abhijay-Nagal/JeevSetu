@@ -9,7 +9,6 @@ export default function Particles({
   className = '',
 }) {
   const canvasRef = useRef(null);
-  const requestRef = useRef(null);
   const particlesRef = useRef([]);
 
   useEffect(() => {
@@ -17,6 +16,16 @@ export default function Particles({
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
+
+    // The line colour never changes inside a frame, but the connecting-line
+    // loop is O(n^2) -- parsing the same hex there cost thousands of parses a
+    // second. Resolve it once per effect instead.
+    let r = 11, g = 61, b = 46; // fallback for #0B3D2E
+    if (lineColor.startsWith('#') && lineColor.length === 7) {
+      r = parseInt(lineColor.slice(1, 3), 16);
+      g = parseInt(lineColor.slice(3, 5), 16);
+      b = parseInt(lineColor.slice(5, 7), 16);
+    }
 
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
@@ -34,6 +43,10 @@ export default function Particles({
       }));
     };
 
+    // A decorative background that drifts forever is exactly what
+    // prefers-reduced-motion is asking us not to do -- draw one still frame.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
@@ -43,8 +56,10 @@ export default function Particles({
 
       // Update and draw each particle
       particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
+        if (!prefersReducedMotion) {
+          p.x += p.vx;
+          p.y += p.vy;
+        }
 
         // Bounce off walls
         if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
@@ -69,15 +84,7 @@ export default function Particles({
             ctx.lineTo(particles[j].x, particles[j].y);
             // Opacity based on distance
             const opacity = 1 - distance / maxDistance;
-            
-            // Extract rgb from hex
-            let r=11, g=61, b=46; // fallback for #0B3D2E
-            if (lineColor.startsWith('#') && lineColor.length === 7) {
-              r = parseInt(lineColor.slice(1,3), 16);
-              g = parseInt(lineColor.slice(3,5), 16);
-              b = parseInt(lineColor.slice(5,7), 16);
-            }
-            
+
             ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${opacity * 0.4})`;
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -85,7 +92,9 @@ export default function Particles({
         }
       }
 
-      animationFrameId = requestAnimationFrame(drawParticles);
+      if (!prefersReducedMotion) {
+        animationFrameId = requestAnimationFrame(drawParticles);
+      }
     };
 
     animationFrameId = requestAnimationFrame(drawParticles);
@@ -96,5 +105,5 @@ export default function Particles({
     };
   }, [particleCount, particleColor, lineColor, maxDistance, speed]);
 
-  return <canvas ref={canvasRef} className={`w-full h-full border-none block ${className}`} />;
+  return <canvas ref={canvasRef} aria-hidden="true" className={`w-full h-full border-none block ${className}`} />;
 }

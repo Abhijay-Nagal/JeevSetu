@@ -39,7 +39,7 @@ function MySubmissions() {
         merged.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         setSubmissions(merged)
       })
-      .catch((err) => setError("Failed to load submissions."))
+      .catch((err) => setError(err.message || "Failed to load submissions."))
       .finally(() => setLoading(false))
   }, [])
 

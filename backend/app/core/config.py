@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     smtp_from_name: str = "JeevSetu"
     frontend_url: str = "http://localhost:5173"
 
+    # Security
+    allowed_origins: str = "http://localhost:5173"  # comma-separated for multiple
+    rate_limit_per_minute: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:

@@ -30,11 +30,11 @@ class ConfirmEmailResult(BaseModel):
 
 
 class ObservationCreate(BaseModel):
-    species: str | None = None
-    description: str | None = None
-    location: str | None = None
-    media_url: str | None = None
-    community_slug: str | None = None
+    species: str | None = Field(default=None, max_length=200)
+    description: str | None = Field(default=None, max_length=5000)
+    location: str | None = Field(default=None, max_length=500)
+    media_url: str | None = Field(default=None, max_length=2000)
+    community_slug: str | None = Field(default=None, max_length=200)
 
 
 class Observation(BaseModel):
@@ -71,9 +71,9 @@ class StatusEvent(BaseModel):
 
 # 1. Search Schemas
 class SearchQuery(BaseModel):
-    query: str
-    limit: int = 10
-    filter_type: str | None = None
+    query: str = Field(max_length=1000)
+    limit: int = Field(default=10, ge=1, le=50)
+    filter_type: str | None = Field(default=None, max_length=100)
 
 
 class SearchResultCard(BaseModel):
@@ -117,8 +117,8 @@ class NextStepsResponse(BaseModel):
 
 # 3. Quiz Schemas
 class QuizQuery(BaseModel):
-    topic: str
-    num_questions: int = 5
+    topic: str = Field(max_length=500)
+    num_questions: int = Field(default=5, ge=1, le=20)
 
 
 class QuizQuestion(BaseModel):
@@ -135,8 +135,8 @@ class QuizResponse(BaseModel):
 
 # 4. Community Schemas
 class CommunityCreate(BaseModel):
-    name: str
-    description: str | None = None
+    name: str = Field(max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
 
 
 class Community(BaseModel):
@@ -162,7 +162,7 @@ class LikeStatus(BaseModel):
 
 
 class CommentCreate(BaseModel):
-    content: str
+    content: str = Field(max_length=5000)
 
 
 class Comment(BaseModel):
@@ -180,12 +180,12 @@ class RelatedRecordsQuery(BaseModel):
 
 
 class ResearchSubmissionCreate(BaseModel):
-    title: str
-    abstract: str
-    description: str | None = None
-    species: str | None = None
-    location: str | None = None
-    media_url: str | None = None
+    title: str = Field(max_length=500)
+    abstract: str = Field(max_length=10000)
+    description: str | None = Field(default=None, max_length=10000)
+    species: str | None = Field(default=None, max_length=200)
+    location: str | None = Field(default=None, max_length=500)
+    media_url: str | None = Field(default=None, max_length=2000)
 
 
 class ResearchSubmission(ResearchSubmissionCreate):
@@ -232,3 +232,27 @@ class DailyQuestionResult(BaseModel):
     explanation: str | None = None
     coins_awarded: int
     streak: StreakStatus
+
+
+# 7. Analytics / SHAP Schemas
+class ShapExplanation(BaseModel):
+    feature_name: str
+    shap_value: float
+    feature_value: float
+
+
+class UserEngagementProfile(BaseModel):
+    user_id: str
+    features: dict[str, float]
+    risk_score: float
+    risk_label: str
+    shap_explanations: list[ShapExplanation]
+    cv_metrics: dict | None = None
+
+
+class EngagementDashboard(BaseModel):
+    total_users: int
+    at_risk_count: int
+    avg_risk_score: float
+    cv_metrics: dict
+    users: list[UserEngagementProfile]
