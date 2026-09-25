@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Home as HomeIcon, MessageCircle, Compass, Users, FileText, LogOut, Coins, FlaskConical, Bell, Menu, X } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useWallet } from "../context/WalletContext"
@@ -52,6 +52,26 @@ function AppLayout() {
 
   const handleNavClick = () => setIsMobileMenuOpen(false)
 
+  // While the drawer is open it owns the screen: Escape closes it, and the
+  // page behind it stops scrolling so a swipe doesn't drag the feed around
+  // underneath the overlay.
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsMobileMenuOpen(false)
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isMobileMenuOpen])
+
   return (
     <div className="min-h-screen bg-[#F8F6E9] text-[#0B3D2E] relative flex flex-col md:flex-row">
       <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
@@ -68,7 +88,13 @@ function AppLayout() {
          <span className="font-serif font-bold text-2xl tracking-wide ml-2">
            <span className="text-white">Jeev</span><span className="text-[#6ab457]">Setu</span>
          </span>
-         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1">
+         <button
+           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+           className="p-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4C430]"
+           aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+           aria-expanded={isMobileMenuOpen}
+           aria-controls="app-sidebar"
+         >
            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
          </button>
       </div>
@@ -77,9 +103,10 @@ function AppLayout() {
       <div 
         className={`fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
         onClick={() => setIsMobileMenuOpen(false)} 
+        aria-hidden="true"
       />
 
-      <aside className={`fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9] z-50 transform transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside id="app-sidebar" aria-label="Main navigation" className={`fixed inset-y-0 left-0 w-64 border-r border-[#0B3D2E]/10 bg-[#0B3D2E] text-[#F8F6E9] z-50 transform transition-transform duration-300 md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex h-full flex-col p-6 overflow-y-auto">
 
           <div className="mb-6 flex flex-col items-center shrink-0 pt-8 md:pt-0">
@@ -100,6 +127,11 @@ function AppLayout() {
             >
               <Coins size={16} />
               My Collectables
+              {coinBalance !== null && (
+                <span className="rounded-full bg-[#0B3D2E]/15 px-2 py-0.5 text-xs font-bold tabular-nums">
+                  {coinBalance.toLocaleString()}
+                </span>
+              )}
             </NavLink>
           </SpotlightCard>
 

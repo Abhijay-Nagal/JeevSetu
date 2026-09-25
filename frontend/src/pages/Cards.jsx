@@ -4,46 +4,27 @@ import { useNavigate } from "react-router-dom"
 import SpotlightCard from "../components/ui/SpotlightCard"
 import ShinyText from "../components/ui/ShinyText"
 import SplitText from "../components/ui/SplitText"
+import { myCards } from "../data/cards"
 
 export const route = { layout: "app" }
-
-const myCards = [
-  {
-    id: "peacock",
-    name: "Peacock",
-    rarity: "Epic",
-    color: "#9C27B0", // Purple for Epic
-    image: "/cards/peacock.jpg",
-    habitat: "Forests, agricultural lands, and urban areas in South Asia.",
-    description: "The Indian peafowl, known for its magnificent tail feathers, is a large and brightly colored bird native to the Indian subcontinent."
-  },
-  {
-    id: "beetle",
-    name: "Rhino Beetle",
-    rarity: "Rare",
-    color: "#2196F3", // Blue for Rare
-    image: "/cards/beetle.jpg",
-    habitat: "Tropical rainforests and woodlands across the globe.",
-    description: "Known for their immense strength and large horns, rhinoceros beetles are among the largest of beetles and can lift incredibly heavy objects."
-  },
-  {
-    id: "monkey",
-    name: "Jungle Monkey",
-    rarity: "Common",
-    color: "#4CAF50", // Green for Common
-    image: "/cards/monkey.jpg",
-    habitat: "Dense tropical rainforests and canopies.",
-    description: "Agile and highly intelligent, these primates are known for their strong social bonds, curiosity, and incredible swinging abilities."
-  }
-]
 
 function AnimalCard({ card }) {
   const [isFlipped, setIsFlipped] = useState(false)
 
   return (
-    <div 
-      className="relative w-full aspect-[3/4] cursor-pointer group [perspective:1000px]"
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={isFlipped}
+      aria-label={`${card.name} card -- ${isFlipped ? "showing details, activate to flip back" : "activate to flip for details"}`}
+      className="relative w-full aspect-[3/4] cursor-pointer group [perspective:1000px] rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F4C430] focus-visible:ring-offset-2"
       onClick={() => setIsFlipped(!isFlipped)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          setIsFlipped((flipped) => !flipped)
+        }
+      }}
     >
       <div 
         className={`w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
