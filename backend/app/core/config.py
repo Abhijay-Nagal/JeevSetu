@@ -1,9 +1,15 @@
+import os
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Serverless hosts (Vercel sets VERCEL=1) only allow writes under /tmp, and
+# that storage is per-instance and wiped on cold starts.
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+DEFAULT_DATA_DIR = "/tmp/jeevsetu" if IS_SERVERLESS else str(BACKEND_DIR / ".data")
 
 
 class Settings(BaseSettings):
@@ -13,7 +19,7 @@ class Settings(BaseSettings):
     # the app runs with no external services. "supabase" uses the hosted
     # Postgres project below instead (apply supabase/migrations first).
     data_backend: str = "local"
-    data_dir: str = str(BACKEND_DIR / ".data")
+    data_dir: str = DEFAULT_DATA_DIR
 
     supabase_url: str = ""
     supabase_anon_key: str = ""

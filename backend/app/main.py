@@ -19,7 +19,7 @@ from app.routers import (
     rewards,
     uploads,
 )
-from app.services import knowledge_base, seed
+from app.services import knowledge_base
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -34,10 +34,7 @@ async def lifespan(_app: FastAPI):
     # Build the search index up front so the first search isn't slow.
     knowledge_base.get_knowledge_base()
     if not settings.uses_supabase:
-        try:
-            seed.seed_if_empty(get_supabase(), settings)
-        except Exception:  # never block startup on demo content
-            logger.exception("Seeding demo data failed")
+        get_supabase()  # opens the local store and seeds it if empty
     yield
 
 

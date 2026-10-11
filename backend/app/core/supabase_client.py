@@ -1,3 +1,4 @@
+import logging
 from functools import lru_cache
 from pathlib import Path
 
@@ -23,5 +24,13 @@ def get_supabase():
         return create_client(settings.supabase_url, settings.supabase_service_role_key)
 
     from app.core.local_store import LocalStore
+    from app.services import seed
 
-    return LocalStore(Path(settings.data_dir) / "jeevsetu.db")
+    store = LocalStore(Path(settings.data_dir) / "jeevsetu.db")
+    # Seed here rather than only at app startup: serverless platforms may
+    # never run the ASGI lifespan hook, and each instance starts empty.
+    try:
+        seed.seed_if_empty(store, settings)
+    except Exception:  # demo content must never take the API down
+        logging.getLogger(__name__).exception("Seeding demo data failed")
+    return store

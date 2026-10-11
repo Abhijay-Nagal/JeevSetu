@@ -20,7 +20,7 @@ from pathlib import Path
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.config import get_settings
+from app.core.config import IS_SERVERLESS, get_settings
 from app.core.supabase_client import get_supabase
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -51,6 +51,14 @@ def _signing_key() -> bytes:
     settings = get_settings()
     if settings.auth_secret:
         return settings.auth_secret.encode()
+
+    # Serverless instances don't share a disk, so a per-instance generated
+    # secret would reject tokens issued by another instance. Derive a stable
+    # one from a server-side secret that every instance already has.
+    if IS_SERVERLESS:
+        for material in (settings.supabase_service_role_key, settings.groq_api_key):
+            if material:
+                return hmac.new(material.encode(), b"jeevsetu-auth", hashlib.sha256).digest()
 
     # No secret configured: generate one once and keep it next to the data,
     # so tokens survive restarts.
