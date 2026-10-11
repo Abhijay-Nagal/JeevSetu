@@ -81,8 +81,7 @@ export const api = {
     request("/quiz", { method: "POST", body: JSON.stringify({ topic, num_questions: numQuestions }) }),
   getWallet: () => request("/rewards/wallet"),
   signup: (body) => request("/auth/signup", { method: "POST", body: JSON.stringify(body) }),
-  login: (username, password) =>
-    request("/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+  login: (username) => request("/auth/login", { method: "POST", body: JSON.stringify({ username }) }),
   me: () => request("/auth/me"),
   checkUsername: (username) => request(`/auth/username-available?username=${encodeURIComponent(username)}`),
   sendConfirmationEmail: () => request("/auth/send-confirmation", { method: "POST" }),

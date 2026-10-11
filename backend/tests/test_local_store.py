@@ -37,7 +37,7 @@ def test_filters_order_and_limit(store):
 
 
 def test_select_projects_columns(store):
-    store.table("users").insert({"id": "u1", "name": "Asha", "password_hash": "secret"}).execute()
+    store.table("users").insert({"id": "u1", "name": "Asha", "email": "a@example.com"}).execute()
 
     row = store.table("users").select("id, name").eq("id", "u1").execute().data[0]
 

@@ -18,14 +18,12 @@ class User(BaseModel):
 
 class SignupRequest(BaseModel):
     username: str = Field(min_length=3, max_length=24)
-    password: str = Field(min_length=8, max_length=128)
     name: str = Field(min_length=1, max_length=100)
     email: str | None = Field(default=None, max_length=254)
 
 
 class LoginRequest(BaseModel):
     username: str = Field(min_length=1, max_length=64)
-    password: str = Field(min_length=1, max_length=128)
 
 
 class UserProfile(BaseModel):

@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(
-    async (username, password) => startSession(await api.login(username, password)),
+    async (username) => startSession(await api.login(username)),
     [startSession]
   );
 

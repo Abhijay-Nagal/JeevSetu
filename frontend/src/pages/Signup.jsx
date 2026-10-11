@@ -51,7 +51,6 @@ export default function Signup() {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const availability = useUsernameAvailability(username);
@@ -61,7 +60,7 @@ export default function Signup() {
     setError(null);
     setSubmitting(true);
     try {
-      await signup({ username, name: name.trim(), email: email.trim() || null, password });
+      await signup({ username, name: name.trim(), email: email.trim() || null });
       navigate("/", { replace: true });
     } catch (err) {
       setError(err.message);
@@ -149,23 +148,6 @@ export default function Signup() {
             onChange={(event) => setEmail(event.target.value)}
             className={inputClass}
           />
-        </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className={inputClass}
-          />
-          <p className="mt-1 text-xs opacity-60">At least 8 characters.</p>
         </div>
 
         {error && (

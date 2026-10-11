@@ -1,6 +1,7 @@
-"""Username + password authentication owned by this backend.
+"""Username-only authentication owned by this backend.
 
-Passwords are stored as salted PBKDF2-SHA256 hashes. A successful login
+Signing in needs just a unique username -- there is no password, so anyone
+who knows a username can sign in as that account. A successful login
 returns a signed bearer token (HMAC-SHA256 over a small JSON payload) that
 the frontend sends on every request.
 """
@@ -24,9 +25,6 @@ from app.core.supabase_client import get_supabase
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-PBKDF2_ITERATIONS = 200_000
-
-
 class CurrentUser:
     def __init__(
         self,
@@ -41,30 +39,6 @@ class CurrentUser:
         self.name = name
         self.role = role
         self.username = username
-
-
-# ---------------------------------------------------------------------------
-# Passwords
-# ---------------------------------------------------------------------------
-
-
-def hash_password(password: str) -> str:
-    salt = secrets.token_hex(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), PBKDF2_ITERATIONS)
-    return f"pbkdf2_sha256${PBKDF2_ITERATIONS}${salt}${digest.hex()}"
-
-
-def verify_password(password: str, stored: str | None) -> bool:
-    if not stored:
-        return False
-    try:
-        algorithm, iterations, salt, expected = stored.split("$")
-    except ValueError:
-        return False
-    if algorithm != "pbkdf2_sha256":
-        return False
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), int(iterations))
-    return hmac.compare_digest(digest.hex(), expected)
 
 
 # ---------------------------------------------------------------------------

@@ -28,7 +28,6 @@ class Settings(BaseSettings):
     # Seeds communities, posts and the demo account into an empty local store.
     seed_demo_data: bool = True
     demo_username: str = "demo_explorer"
-    demo_password: str = "explore-wildlife"
 
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587

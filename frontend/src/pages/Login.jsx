@@ -7,7 +7,6 @@ export const route = { path: "/login" };
 export default function Login() {
   const { login } = useAuth();
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -21,7 +20,7 @@ export default function Login() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(username.trim(), password);
+      await login(username.trim());
       navigate(returnTo, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -42,7 +41,7 @@ export default function Login() {
           </Link>
         </div>
         <h1 className="text-3xl font-bold text-center text-[#F4C430] mb-2">Welcome Back</h1>
-        <p className="text-center text-sm opacity-80 mb-6">Log in to continue your journey</p>
+        <p className="text-center text-sm opacity-80 mb-6">Enter your unique username to continue</p>
 
         <div>
           <label htmlFor="username" className="block text-sm font-medium mb-1">
@@ -54,24 +53,10 @@ export default function Login() {
             required
             autoComplete="username"
             autoCapitalize="none"
+            autoFocus
             spellCheck={false}
             value={username}
             onChange={(event) => setUsername(event.target.value)}
-            className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4C430] transition"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
             className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4C430] transition"
           />
         </div>

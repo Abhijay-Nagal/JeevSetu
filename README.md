@@ -80,7 +80,8 @@ Team-25/
 JeevSetu runs fully self-contained: data lives in a local SQLite file
 (`backend/.data/`), the Knowledge Hub searches a bundled dataset of ~3,000
 real BNHS records (`backend/data/knowledge_base.json.gz`), and login uses a
-**unique username + password**.
+**unique username only** (no password -- anyone who knows a username can
+sign in as it, so this suits demos rather than real user accounts).
 
 ```bash
 # 1. Backend
@@ -97,8 +98,8 @@ cd ../backend && uvicorn app.main:app
 ```
 
 On first start the app seeds demo communities and posts plus a demo login:
-username **`demo_explorer`**, password **`explore-wildlife`** (change via
-`DEMO_USERNAME` / `DEMO_PASSWORD`, or set `SEED_DEMO_DATA=false`). Or sign up
+username **`demo_explorer`** (change via `DEMO_USERNAME`, or set
+`SEED_DEMO_DATA=false`). Or sign up
 with your own unique username.
 
 For frontend development with hot reload, run `npm run dev` in `frontend/`

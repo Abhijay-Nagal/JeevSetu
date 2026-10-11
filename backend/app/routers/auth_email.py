@@ -20,7 +20,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("10/minute")
 async def signup(request: Request, body: SignupRequest, supabase=Depends(get_supabase)):
-    result = accounts.signup(supabase, body.username, body.password, body.name, body.email)
+    result = accounts.signup(supabase, body.username, body.name, body.email)
     # Confirmation email is a bonus, not a gate: login works with the
     # username straight away, and an unconfigured SMTP server shouldn't
     # stop anyone signing up.
@@ -38,7 +38,7 @@ async def signup(request: Request, body: SignupRequest, supabase=Depends(get_sup
 @router.post("/login", response_model=AuthResponse)
 @limiter.limit("10/minute")
 async def login(request: Request, body: LoginRequest, supabase=Depends(get_supabase)):
-    return accounts.login(supabase, body.username, body.password)
+    return accounts.login(supabase, body.username)
 
 
 @router.get("/me", response_model=UserProfile)

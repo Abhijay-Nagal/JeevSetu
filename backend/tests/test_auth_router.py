@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.core.auth import create_access_token, decode_access_token, hash_password, verify_password
+from app.core.auth import create_access_token, decode_access_token
 from app.core.local_store import LocalStore
 from app.core.supabase_client import get_supabase
 from app.main import app
@@ -20,19 +20,11 @@ def client(store):
     return TestClient(app)
 
 
-def _signup(client, username="asha_k", password="wildlife123", **extra):
+def _signup(client, username="asha_k", **extra):
     return client.post(
         "/api/auth/signup",
-        json={"username": username, "password": password, "name": "Asha K", **extra},
+        json={"username": username, "name": "Asha K", **extra},
     )
-
-
-def test_password_hash_roundtrip():
-    stored = hash_password("correct horse")
-
-    assert verify_password("correct horse", stored)
-    assert not verify_password("wrong horse", stored)
-    assert not verify_password("anything", None)
 
 
 def test_token_roundtrip_and_tamper_detection():
@@ -51,7 +43,6 @@ def test_signup_returns_token_profile_and_welcome_bonus(client):
     assert body["access_token"]
     assert body["user"]["username"] == "asha_k"
     assert body["user"]["coin_balance"] == 50
-    assert "password_hash" not in body["user"]
 
 
 def test_signup_normalises_and_rejects_duplicate_usernames(client):
@@ -68,22 +59,16 @@ def test_signup_rejects_invalid_usernames(client, username):
     assert _signup(client, username=username).status_code in (409, 422)
 
 
-def test_signup_rejects_short_password(client):
-    assert _signup(client, password="short").status_code == 422
-
-
-def test_login_with_username(client):
+def test_login_with_username_only(client):
     _signup(client)
 
-    ok = client.post("/api/auth/login", json={"username": "ASHA_K", "password": "wildlife123"})
-    wrong = client.post("/api/auth/login", json={"username": "asha_k", "password": "nope-nope"})
-    unknown = client.post("/api/auth/login", json={"username": "nobody", "password": "wildlife123"})
+    ok = client.post("/api/auth/login", json={"username": "ASHA_K"})
+    unknown = client.post("/api/auth/login", json={"username": "nobody"})
 
     assert ok.status_code == 200
+    assert ok.json()["access_token"]
     assert ok.json()["user"]["username"] == "asha_k"
-    assert wrong.status_code == 401
     assert unknown.status_code == 401
-    assert wrong.json()["detail"] == unknown.json()["detail"]
 
 
 def test_me_requires_a_valid_token(client):

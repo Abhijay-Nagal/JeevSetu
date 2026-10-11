@@ -2,12 +2,11 @@ import re
 
 from fastapi import HTTPException, status
 
-from app.core.auth import create_access_token, hash_password, verify_password
+from app.core.auth import create_access_token
 from app.services import rewards
 
 USERNAME_PATTERN = re.compile(r"^[a-z][a-z0-9_.]{2,23}$")
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-MIN_PASSWORD_LENGTH = 8
 
 PUBLIC_FIELDS = ("id", "username", "name", "email", "role", "coin_balance", "created_at")
 
@@ -51,16 +50,11 @@ def public_profile(row: dict) -> dict:
     return {field: row.get(field) for field in PUBLIC_FIELDS}
 
 
-def signup(supabase, username: str, password: str, name: str, email: str | None) -> dict:
+def signup(supabase, username: str, name: str, email: str | None) -> dict:
     username = normalize_username(username)
     available, reason = is_username_available(supabase, username)
     if not available:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=reason)
-    if len(password) < MIN_PASSWORD_LENGTH:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Password must be at least {MIN_PASSWORD_LENGTH} characters",
-        )
     email = (email or "").strip().lower() or None
     if email and not EMAIL_PATTERN.match(email):
         raise HTTPException(
@@ -74,7 +68,6 @@ def signup(supabase, username: str, password: str, name: str, email: str | None)
                 "username": username,
                 "name": name.strip() or username,
                 "email": email,
-                "password_hash": hash_password(password),
                 "role": "contributor",
                 "coin_balance": 0,
             }
@@ -89,13 +82,12 @@ def signup(supabase, username: str, password: str, name: str, email: str | None)
     return {"access_token": create_access_token(user["id"]), "user": public_profile(user)}
 
 
-def login(supabase, username: str, password: str) -> dict:
+def login(supabase, username: str) -> dict:
     user = find_by_username(supabase, username)
-    # Same message whether the username or the password was wrong, so the
-    # login form can't be used to probe which usernames exist.
-    if user is None or not verify_password(password, user.get("password_hash")):
+    if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No account with that username -- check the spelling or sign up",
         )
     return {"access_token": create_access_token(user["id"]), "user": public_profile(user)}
 

@@ -5,8 +5,8 @@ Seeds a handful of community members, communities, posts, comments and likes
 memberships are consistent -- plus one demo login. Runs only when the local
 store has no users yet; set SEED_DEMO_DATA=false to start empty.
 
-The member personas have no password and can't be logged into; only the demo
-account (DEMO_USERNAME / DEMO_PASSWORD) can.
+Every seeded account can be signed into with just its username; the demo
+account is DEMO_USERNAME.
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, timezone
 
-from app.core.auth import hash_password
 from app.models.schema import CommunityCreate, ObservationCreate
 from app.services import comments, communities, likes, observations, rewards
 
@@ -335,7 +334,7 @@ def _iso(days_ago: float) -> str:
     return (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
 
 
-def _create_user(supabase, username: str, name: str, password: str | None, days_ago: float) -> str:
+def _create_user(supabase, username: str, name: str, days_ago: float) -> str:
     row = (
         supabase.table("users")
         .insert(
@@ -343,7 +342,6 @@ def _create_user(supabase, username: str, name: str, password: str | None, days_
                 "username": username,
                 "name": name,
                 "email": None,
-                "password_hash": hash_password(password) if password else None,
                 "role": "contributor",
                 "coin_balance": 0,
                 "created_at": _iso(days_ago),
@@ -361,9 +359,9 @@ def _backdate(supabase, table: str, row_id: str, days_ago: float, *columns: str)
     supabase.table(table).update({column: stamp for column in columns}).eq("id", row_id).execute()
 
 
-def seed_demo_content(supabase, demo_username: str, demo_password: str) -> None:
+def seed_demo_content(supabase, demo_username: str) -> None:
     users = {
-        username: _create_user(supabase, username, name, None, 20) for username, name in PERSONAS
+        username: _create_user(supabase, username, name, 20) for username, name in PERSONAS
     }
 
     slugs = {}
@@ -405,7 +403,7 @@ def seed_demo_content(supabase, demo_username: str, demo_password: str) -> None:
 
     # The demo account: a member of a couple of communities with a post of
     # its own, so every screen has something to show on first login.
-    demo_id = _create_user(supabase, demo_username, "Demo Explorer", demo_password, 3)
+    demo_id = _create_user(supabase, demo_username, "Demo Explorer", 3)
     for name in ("Western Ghats Birders", "Wetland Watchers"):
         community = communities.get_community_by_slug(supabase, slugs[name])
         communities.join_community(supabase, community["id"], demo_id)
@@ -437,5 +435,5 @@ def seed_if_empty(supabase, settings) -> bool:
     logger.info(
         "Empty data store -- seeding demo communities and the '%s' account", settings.demo_username
     )
-    seed_demo_content(supabase, settings.demo_username, settings.demo_password)
+    seed_demo_content(supabase, settings.demo_username)
     return True

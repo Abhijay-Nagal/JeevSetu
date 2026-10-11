@@ -25,7 +25,7 @@ def client(store):
 
 def _auth(client, username):
     token = client.post(
-        "/api/auth/signup", json={"username": username, "password": "password123", "name": username}
+        "/api/auth/signup", json={"username": username, "name": username}
     ).json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
@@ -125,7 +125,7 @@ def test_seeded_demo_account_can_log_in(client, store):
 
     login = client.post(
         "/api/auth/login",
-        json={"username": settings.demo_username, "password": settings.demo_password},
+        json={"username": settings.demo_username},
     )
 
     assert seeded is True
@@ -134,12 +134,7 @@ def test_seeded_demo_account_can_log_in(client, store):
     assert len(client.get("/api/communities").json()) == 6
     assert len(client.get("/api/communities/mine", headers=headers).json()) == 2
     assert client.get("/api/notifications", headers=headers).json()
-    # Persona accounts have no password and can't be logged into.
-    assert (
-        client.post(
-            "/api/auth/login", json={"username": "meera.kulkarni", "password": "anything"}
-        ).status_code
-        == 401
-    )
+    # Every seeded persona can sign in by username alone.
+    assert client.post("/api/auth/login", json={"username": "meera.kulkarni"}).status_code == 200
     # Seeding is a one-off.
     assert seed.seed_if_empty(store, settings.model_copy(update={"seed_demo_data": True})) is False
