@@ -12,14 +12,34 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-
-import numpy as np
-import pandas as pd
-import shap
-import xgboost as xgb
-from sklearn.model_selection import cross_val_score
+from typing import TYPE_CHECKING
 
 from app.core.supabase_client import get_supabase
+
+if TYPE_CHECKING:
+    import numpy as np
+    import pandas as pd
+
+# numpy/pandas/xgboost/shap are imported lazily: they add seconds to startup
+# and hundreds of MB to a deployment, and only staff analytics needs them.
+
+
+class AnalyticsUnavailable(RuntimeError):
+    pass
+
+
+def _ml():
+    try:
+        import numpy as np
+        import pandas as pd
+        import shap
+        import xgboost as xgb
+        from sklearn.model_selection import cross_val_score
+    except ImportError as exc:
+        raise AnalyticsUnavailable(
+            "Analytics needs numpy, pandas, xgboost, shap and scikit-learn installed"
+        ) from exc
+    return np, pd, shap, xgb, cross_val_score
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +63,21 @@ FEATURE_COLUMNS = [
     "account_age_days",
 ]
 
+# The churn label is defined from days_since_last_activity, so feeding that
+# column (or 7-day coin velocity, which is non-zero exactly when the user was
+# active this week) back into the model would let it read the answer off the
+# input. They're still reported per user, just not used for prediction.
+LEAKY_FEATURES = {"days_since_last_activity", "coin_velocity_7d"}
+MODEL_FEATURES = [column for column in FEATURE_COLUMNS if column not in LEAKY_FEATURES]
+
 
 # ---------------------------------------------------------------------------
 # Feature engineering
 # ---------------------------------------------------------------------------
 
-def _fetch_user_features() -> pd.DataFrame:
+def _fetch_user_features() -> "pd.DataFrame":
     """Pull per-user behavioural features from existing Supabase tables."""
+    _, pd, _, _, _ = _ml()
     supabase = get_supabase()
     now = datetime.now(timezone.utc)
 
@@ -175,16 +203,16 @@ def _parse_ts(value) -> datetime | None:
 # Model training + SHAP
 # ---------------------------------------------------------------------------
 
-def _train_and_explain(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, dict]:
+def _train_and_explain(df: "pd.DataFrame") -> tuple["np.ndarray", "np.ndarray", dict]:
     """Train XGBoost, compute SHAP values, return (risk_scores, shap_values, cv_metrics)."""
-    X = df[FEATURE_COLUMNS].values.astype(float)
+    np, _, shap, xgb, cross_val_score = _ml()
+    X = df[MODEL_FEATURES].values.astype(float)
     y = (df["days_since_last_activity"] >= CHURN_THRESHOLD_DAYS).astype(int).values
 
     model = xgb.XGBClassifier(
         n_estimators=100,
         max_depth=4,
         learning_rate=0.1,
-        use_label_encoder=False,
         eval_metric="logloss",
         random_state=42,
     )
@@ -223,13 +251,13 @@ def _risk_label(score: float) -> str:
     return "low"
 
 
-def _top_shap_features(shap_row: np.ndarray, feature_values: np.ndarray, top_n: int = 3) -> list[dict]:
+def _top_shap_features(shap_row: "np.ndarray", feature_values: "np.ndarray", top_n: int = 3) -> list[dict]:
     """Return the top-N SHAP contributors for a single user."""
-    abs_shap = np.abs(shap_row)
+    abs_shap = abs(shap_row)
     top_indices = abs_shap.argsort()[-top_n:][::-1]
     return [
         {
-            "feature_name": FEATURE_COLUMNS[i],
+            "feature_name": MODEL_FEATURES[i],
             "shap_value": round(float(shap_row[i]), 4),
             "feature_value": round(float(feature_values[i]), 2),
         }
@@ -276,7 +304,7 @@ def get_engagement_dashboard() -> dict:
         }
 
     risk_scores, shap_values, cv_metrics = _train_and_explain(df)
-    X = df[FEATURE_COLUMNS].values.astype(float)
+    X = df[MODEL_FEATURES].values.astype(float)
 
     users = []
     at_risk = 0
@@ -299,7 +327,7 @@ def get_engagement_dashboard() -> dict:
     return {
         "total_users": len(df),
         "at_risk_count": at_risk,
-        "avg_risk_score": round(float(np.mean(risk_scores)), 4),
+        "avg_risk_score": round(float(risk_scores.mean()), 4),
         "cv_metrics": cv_metrics,
         "users": users,
     }

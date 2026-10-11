@@ -13,7 +13,7 @@ function createMessageId() {
 }
 
 export default function RAGChat({
-  accessToken = null,
+  embedded = false,
 }) {
   const [question, setQuestion] =
     useState("");
@@ -63,7 +63,7 @@ export default function RAGChat({
       const response =
         await queryBNHS(
           finalQuestion,
-          accessToken,
+          messages,
         );
 
       const assistantMessage = {
@@ -104,9 +104,22 @@ export default function RAGChat({
 
   return (
     <div className="mx-auto w-full max-w-6xl">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+      <section className={embedded ? "overflow-hidden rounded-2xl border border-slate-200 bg-white" : "overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-xl shadow-slate-200/50"}>
 
         {/* Header */}
+        {embedded ? (
+          messages.length > 0 && (
+            <div className="flex justify-end border-b border-slate-100 px-4 py-2">
+              <button
+                type="button"
+                onClick={handleClearConversation}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-red-50 hover:text-red-700"
+              >
+                Clear conversation
+              </button>
+            </div>
+          )
+        ) : (
         <header className="border-b border-slate-100 bg-gradient-to-r from-emerald-50 via-white to-blue-50 px-6 py-7 md:px-8">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
 
@@ -142,12 +155,13 @@ export default function RAGChat({
 
           </div>
         </header>
+        )}
 
         {/* Conversation */}
-        <div className="min-h-[520px] bg-slate-50/70 px-4 py-6 md:px-8">
+        <div className={`${embedded ? "min-h-[360px]" : "min-h-[520px]"} bg-slate-50/70 px-4 py-6 md:px-8`}>
 
           {messages.length === 0 ? (
-            <div className="flex min-h-[430px] flex-col justify-center">
+            <div className={`flex ${embedded ? "min-h-[300px]" : "min-h-[430px]"} flex-col justify-center`}>
               <div className="mx-auto w-full max-w-3xl text-center">
 
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100 text-3xl">

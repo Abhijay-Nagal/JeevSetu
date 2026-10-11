@@ -75,6 +75,43 @@ Team-25/
 └── docs/                  # architecture, plans, ground-truth test queries
 ```
 
+## Quick Start (no external services needed)
+
+JeevSetu runs fully self-contained: data lives in a local SQLite file
+(`backend/.data/`), the Knowledge Hub searches a bundled dataset of ~3,000
+real BNHS records (`backend/data/knowledge_base.json.gz`), and login uses a
+**unique username + password**.
+
+```bash
+# 1. Backend
+cd backend
+python -m venv .venv && .venv/Scripts/activate   # macOS/Linux: source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env            # optional: add GROQ_API_KEY for AI answers
+
+# 2. Frontend (build once; the backend serves it)
+cd ../frontend && npm install && npm run build
+
+# 3. Run everything on http://localhost:8000
+cd ../backend && uvicorn app.main:app
+```
+
+On first start the app seeds demo communities and posts plus a demo login:
+username **`demo_explorer`**, password **`explore-wildlife`** (change via
+`DEMO_USERNAME` / `DEMO_PASSWORD`, or set `SEED_DEMO_DATA=false`). Or sign up
+with your own unique username.
+
+For frontend development with hot reload, run `npm run dev` in `frontend/`
+(port 5173, proxies `/api` to the backend on port 8000).
+
+Without `GROQ_API_KEY`, the chatbot, quizzes, daily question and next-step
+suggestions fall back to answers built directly from the BNHS archive.
+To rebuild the dataset from the live BNHS collections API:
+`python scripts/build_knowledge_base.py`.
+
+Set `DATA_BACKEND=supabase` (plus the Supabase keys, after applying
+`supabase/migrations/`) to use a hosted Postgres instead of SQLite.
+
 ## Prerequisites
 
 - **Node.js** 18+ and npm

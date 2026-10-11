@@ -167,9 +167,10 @@ function AppLayout() {
           <div className="mt-auto space-y-2 border-t border-white/10 pt-4 shrink-0 pb-4">
             {user ? (
               <>
-                <p className="truncate px-4 text-xs text-[#F8F6E9]/60">
-                  {user?.user_metadata?.name || user?.email}
-                </p>
+                <div className="px-4">
+                  <p className="truncate text-sm font-semibold text-[#F8F6E9]/90">{user.name || user.username}</p>
+                  <p className="truncate text-xs text-[#F8F6E9]/60">@{user.username}</p>
+                </div>
                 <button
                   onClick={() => { signOut(); handleNavClick(); }}
                   className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-[#F8F6E9]/75 transition hover:bg-white/10 hover:text-[#F8F6E9]"

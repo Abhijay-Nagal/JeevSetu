@@ -1,31 +1,32 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export const route = { path: "/login" };
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const { login } = useAuth();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  // RequireAuth passes the page that sent us here, so logging in returns
+  // you to it instead of always dropping you on the home feed.
+  const returnTo = location.state?.from?.pathname || "/";
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
     setSubmitting(true);
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-
-    setSubmitting(false);
-
-    if (signInError) {
-      setError(signInError.message);
-      return;
+    try {
+      await login(username.trim(), password);
+      navigate(returnTo, { replace: true });
+    } catch (err) {
+      setError(err.message);
+      setSubmitting(false);
     }
-
-    navigate("/explore-communities");
   }
 
   return (
@@ -44,15 +45,18 @@ export default function Login() {
         <p className="text-center text-sm opacity-80 mb-6">Log in to continue your journey</p>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
-            Email
+          <label htmlFor="username" className="block text-sm font-medium mb-1">
+            Username
           </label>
           <input
-            id="email"
-            type="email"
+            id="username"
+            type="text"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
             className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4C430] transition"
           />
         </div>
@@ -65,13 +69,14 @@ export default function Login() {
             id="password"
             type="password"
             required
+            autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#F4C430] transition"
           />
         </div>
 
-        {error && <p className="text-sm text-red-400 bg-red-400/10 p-3 rounded-lg text-center border border-red-400/20">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-400 bg-red-400/10 p-3 rounded-lg text-center border border-red-400/20">{error}</p>}
 
         <button
           type="submit"

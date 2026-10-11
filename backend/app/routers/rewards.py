@@ -25,7 +25,7 @@ async def get_wallet(
 
 
 @router.get("/daily-question", response_model=DailyQuestionPublic)
-async def get_daily_question(
+def get_daily_question(
     user: CurrentUser = Depends(get_current_user),
     supabase: Client = Depends(get_supabase),
 ):
@@ -43,7 +43,7 @@ async def get_daily_question(
 
 
 @router.post("/daily-question/answer", response_model=DailyQuestionResult)
-async def answer_daily_question(
+def answer_daily_question(
     body: DailyQuestionAnswer,
     user: CurrentUser = Depends(get_current_user),
     supabase: Client = Depends(get_supabase),

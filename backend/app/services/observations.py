@@ -58,11 +58,27 @@ def _attach_author_name(supabase: Client, posts: list[dict]) -> list[dict]:
         return posts
     author_ids = list({p["user_id"] for p in posts})
     authors = (
-        supabase.table("users").select("id, name, email").in_("id", author_ids).execute()
+        supabase.table("users").select("id, name, username").in_("id", author_ids).execute()
     )
-    names_by_id = {row["id"]: row.get("name") or row.get("email") for row in authors.data}
+    authors_by_id = {row["id"]: row for row in authors.data}
+
+    post_ids = [p["id"] for p in posts]
+    comment_rows = (
+        supabase.table("observation_comments")
+        .select("observation_id")
+        .in_("observation_id", post_ids)
+        .execute()
+        .data
+    )
+    comment_counts: dict[str, int] = {}
+    for row in comment_rows:
+        comment_counts[row["observation_id"]] = comment_counts.get(row["observation_id"], 0) + 1
+
     for p in posts:
-        p["author_name"] = names_by_id.get(p["user_id"])
+        author = authors_by_id.get(p["user_id"], {})
+        p["author_name"] = author.get("name") or author.get("username")
+        p["author_username"] = author.get("username")
+        p["comment_count"] = comment_counts.get(p["id"], 0)
     return posts
 
 

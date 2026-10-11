@@ -31,11 +31,9 @@ def _attach_user_name(supabase: Client, comments: list[dict]) -> list[dict]:
     if not comments:
         return comments
 
-    user_ids = {comment["user_id"] for comment in comments}
-    names: dict[str, str | None] = {}
-    for user_id in user_ids:
-        profile = supabase.table("users").select("name").eq("id", user_id).limit(1).execute()
-        names[user_id] = profile.data[0]["name"] if profile.data else None
+    user_ids = list({comment["user_id"] for comment in comments})
+    profiles = supabase.table("users").select("id, name, username").in_("id", user_ids).execute()
+    names = {row["id"]: row.get("name") or row.get("username") for row in profiles.data}
 
     for comment in comments:
         comment["user_name"] = names.get(comment["user_id"])

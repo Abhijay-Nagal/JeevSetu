@@ -1,8 +1,8 @@
-import { supabase } from "./supabaseClient";
+import { api } from "./api";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-// Supabase rejects an oversized or non-image upload with an opaque error, and
+// The server rejects an oversized or non-image upload with an opaque error, and
 // by then the user has already waited for the transfer -- check up front so
 // the composer can say what is wrong straight away.
 export function validateObservationImage(file) {
@@ -18,15 +18,6 @@ export async function uploadObservationImage(file) {
   const problem = validateObservationImage(file);
   if (problem) throw new Error(problem);
 
-  // A file dropped in from a camera roll can arrive without an extension;
-  // fall back to the MIME subtype so the stored object stays readable.
-  const nameExtension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "";
-  const extension = nameExtension || file.type.split("/")[1] || "jpg";
-  const path = `${crypto.randomUUID()}.${extension}`;
-
-  const { error } = await supabase.storage.from("observation-images").upload(path, file);
-  if (error) throw error;
-
-  const { data } = supabase.storage.from("observation-images").getPublicUrl(path);
-  return data.publicUrl;
+  const { url } = await api.uploadImage(file);
+  return url;
 }

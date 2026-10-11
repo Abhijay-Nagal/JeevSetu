@@ -24,23 +24,30 @@ def test_create_confirmation_stores_a_token(fake_supabase):
     assert rows[0]["confirmed_at"] is None
 
 
-def test_confirm_token_marks_user_confirmed_via_admin_api(fake_supabase):
+def _confirmed_at(fake_supabase):
+    return fake_supabase.table("users").select("*").eq("id", "user-1").execute().data[0].get(
+        "email_confirmed_at"
+    )
+
+
+def test_confirm_token_marks_user_confirmed(fake_supabase):
     token = email_confirmation.create_confirmation(fake_supabase, "user-1")
 
     result = email_confirmation.confirm_token(fake_supabase, token)
 
     assert result["already_confirmed"] is False
-    assert "user-1" in fake_supabase.auth.admin.confirmed_user_ids
+    assert _confirmed_at(fake_supabase) is not None
 
 
-def test_confirm_token_twice_reports_already_confirmed_without_double_admin_call(fake_supabase):
+def test_confirm_token_twice_reports_already_confirmed(fake_supabase):
     token = email_confirmation.create_confirmation(fake_supabase, "user-1")
 
     email_confirmation.confirm_token(fake_supabase, token)
+    first_confirmed_at = _confirmed_at(fake_supabase)
     result = email_confirmation.confirm_token(fake_supabase, token)
 
     assert result["already_confirmed"] is True
-    assert fake_supabase.auth.admin.confirmed_user_ids == ["user-1"]
+    assert _confirmed_at(fake_supabase) == first_confirmed_at
 
 
 def test_confirm_unknown_token_404s(fake_supabase):
@@ -65,4 +72,4 @@ def test_confirm_expired_token_is_rejected(fake_supabase):
         email_confirmation.confirm_token(fake_supabase, token)
 
     assert exc_info.value.status_code == 400
-    assert "user-1" not in fake_supabase.auth.admin.confirmed_user_ids
+    assert _confirmed_at(fake_supabase) is None

@@ -44,7 +44,7 @@ def test_list_all_observations_returns_every_row(fake_supabase):
     observations.create_observation(fake_supabase, "user-1", ObservationCreate(species="Cheetah"))
     observations.create_observation(fake_supabase, "user-2", ObservationCreate(species="Gaur"))
 
-    result = observations.list_all_observations(fake_supabase)
+    result = observations.list_all_observations(fake_supabase, "viewer-1")
 
     assert len(result) == 2
 
@@ -120,7 +120,7 @@ def test_list_community_feed_includes_global_posts(fake_supabase):
         fake_supabase, "someone-else", ObservationCreate(species="Global post")
     )
 
-    feed = observations.list_community_feed(fake_supabase, community["id"])
+    feed = observations.list_community_feed(fake_supabase, community["id"], "viewer-1")
 
     species_in_feed = {row["species"] for row in feed}
     assert species_in_feed == {"In-community post", "Global post"}

@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 Role = Literal["contributor", "staff", "researcher"]
 ObservationStatus = Literal["submitted", "under_review", "forwarded", "responded"]
@@ -15,10 +16,38 @@ class User(BaseModel):
     created_at: datetime
 
 
-class SendConfirmationRequest(BaseModel):
-    user_id: UUID
-    email: str
-    name: str
+class SignupRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=24)
+    password: str = Field(min_length=8, max_length=128)
+    name: str = Field(min_length=1, max_length=100)
+    email: str | None = Field(default=None, max_length=254)
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class UserProfile(BaseModel):
+    id: str
+    username: str | None = None
+    name: str | None = None
+    email: str | None = None
+    role: str = "contributor"
+    coin_balance: int = 0
+    created_at: datetime | None = None
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserProfile
+
+
+class UsernameAvailability(BaseModel):
+    username: str
+    available: bool
+    reason: str | None = None
 
 
 class ConfirmEmailRequest(BaseModel):
@@ -36,10 +65,25 @@ class ObservationCreate(BaseModel):
     media_url: str | None = Field(default=None, max_length=2000)
     community_slug: str | None = Field(default=None, max_length=200)
 
+    @field_validator("media_url")
+    @classmethod
+    def media_url_must_be_web_or_upload(cls, value: str | None) -> str | None:
+        if value and not value.startswith(("https://", "http://", "/api/uploads/")):
+            raise ValueError("media_url must be an uploaded image or an http(s) link")
+        return value
+
+    @model_validator(mode="after")
+    def must_have_content(self) -> "ObservationCreate":
+        if not ((self.species or "").strip() or (self.description or "").strip() or self.media_url):
+            raise ValueError("A post needs a species, a description or a photo")
+        return self
+
 
 class Observation(BaseModel):
     id: UUID
     user_id: UUID
+    author_username: str | None = None
+    comment_count: int = 0
     author_name: str | None = None
     species: str | None = None
     description: str | None = None
@@ -162,7 +206,14 @@ class LikeStatus(BaseModel):
 
 
 class CommentCreate(BaseModel):
-    content: str = Field(max_length=5000)
+    content: str = Field(min_length=1, max_length=5000)
+
+    @field_validator("content")
+    @classmethod
+    def not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Comment can't be empty")
+        return value.strip()
 
 
 class Comment(BaseModel):
@@ -256,3 +307,58 @@ class EngagementDashboard(BaseModel):
     avg_risk_score: float
     cv_metrics: dict
     users: list[UserEngagementProfile]
+
+
+# 8. Knowledge Hub chat
+class ChatTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=4000)
+
+
+class AskRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=1000)
+    history: list[ChatTurn] = Field(default_factory=list, max_length=10)
+
+
+class AskSource(BaseModel):
+    title: str
+    excerpt: str | None = None
+    url: str | None = None
+    content_type: str | None = None
+
+
+class AskResponse(BaseModel):
+    answer: str
+    sources: list[AskSource]
+    generated_by: Literal["llm", "archive"]
+
+
+# 9. Notifications
+class Notification(BaseModel):
+    id: str
+    type: Literal["comment", "like", "reward", "status", "welcome"]
+    title: str
+    message: str
+    link: str | None = None
+    created_at: datetime
+
+
+# 10. Collectable cards
+class Card(BaseModel):
+    id: str
+    name: str
+    scientific_name: str
+    rarity: Literal["Common", "Rare", "Epic", "Legendary"]
+    price: int
+    color: str
+    image: str | None = None
+    icon: str
+    habitat: str
+    description: str
+    iucn_status: str | None = None
+    owned: bool = False
+
+
+class CardCollection(BaseModel):
+    coin_balance: int
+    cards: list[Card]

@@ -1,3 +1,4 @@
+import threading
 from datetime import date
 
 from fastapi import HTTPException, status
@@ -18,6 +19,11 @@ TOPICS = [
     "citizen science and wildlife monitoring",
     "vultures and raptor conservation in India",
 ]
+
+
+# Generating a question takes an LLM round-trip; without this, two users
+# opening Rewards at the same moment on a new day would each create one.
+_generation_lock = threading.Lock()
 
 
 def _topic_for_date(question_date: date) -> str:
@@ -53,13 +59,24 @@ def get_or_create_todays_question(
     if existing.data:
         return existing.data[0]
 
-    generated = generate_fn(_topic_for_date(today))
-    result = (
-        supabase.table("daily_questions")
-        .insert({"question_date": today.isoformat(), **generated})
-        .execute()
-    )
-    return result.data[0]
+    with _generation_lock:
+        existing = (
+            supabase.table("daily_questions")
+            .select("*")
+            .eq("question_date", today.isoformat())
+            .limit(1)
+            .execute()
+        )
+        if existing.data:
+            return existing.data[0]
+
+        generated = generate_fn(_topic_for_date(today))
+        result = (
+            supabase.table("daily_questions")
+            .insert({"question_date": today.isoformat(), **generated})
+            .execute()
+        )
+        return result.data[0]
 
 
 def has_answered_today(supabase: Client, daily_question_id: str, user_id: str) -> bool:

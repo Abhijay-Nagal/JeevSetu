@@ -1,16 +1,49 @@
-from fastapi import FastAPI, Request
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
-from app.core.config import get_settings
+from app.core.config import BACKEND_DIR, get_settings
 from app.core.security import setup_security
-from app.routers import analytics, auth_email, communities, community, rag, research, rewards
+from app.core.supabase_client import get_supabase
+from app.routers import (
+    analytics,
+    auth_email,
+    communities,
+    community,
+    engagement,
+    rag,
+    research,
+    rewards,
+    uploads,
+)
+from app.services import knowledge_base, seed
 
-app = FastAPI(title="BNHS Code for Good API")
-
-# --- CORS --- tightened from allow_origins=["*"] to configurable origins.
-# Set ALLOWED_ORIGINS in .env (comma-separated) for production.
+logger = logging.getLogger(__name__)
 settings = get_settings()
+
+# Built frontend (npm run build). When present the API also serves the web
+# app, so a single `uvicorn app.main:app` runs all of JeevSetu.
+FRONTEND_DIST = (BACKEND_DIR.parent / "frontend" / "dist").resolve()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Build the search index up front so the first search isn't slow.
+    knowledge_base.get_knowledge_base()
+    if not settings.uses_supabase:
+        try:
+            seed.seed_if_empty(get_supabase(), settings)
+        except Exception:  # never block startup on demo content
+            logger.exception("Seeding demo data failed")
+    yield
+
+
+app = FastAPI(title="JeevSetu API", lifespan=lifespan)
+
+# --- CORS --- configurable origins; set ALLOWED_ORIGINS (comma-separated).
 origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
 
 app.add_middleware(
@@ -19,7 +52,6 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 # --- Security middleware (rate limiting, security headers, threat logging) ---
@@ -32,29 +64,46 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     Without this, an unhandled exception bypasses CORSMiddleware entirely
     (Starlette's ServerErrorMiddleware sits outside it), so the browser
-    reports it as a CORS failure instead of showing the real 500.
+    reports it as a CORS failure instead of showing the real 500. The
+    exception text is logged, not returned -- it can contain internals.
     """
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    origin = request.headers.get("origin")
+    headers = {"Access-Control-Allow-Origin": origin} if origin in origins else {}
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc)},
-        headers={
-            "Access-Control-Allow-Origin": origins[0] if origins else "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*",
-        },
+        content={"detail": "Something went wrong on our side. Please try again."},
+        headers=headers,
     )
 
 
-app.include_router(analytics.router, prefix="/api")
-app.include_router(auth_email.router, prefix="/api")
-app.include_router(communities.router, prefix="/api")
-app.include_router(community.router, prefix="/api")
-app.include_router(rag.router, prefix="/api")
-app.include_router(research.router, prefix="/api")
-app.include_router(rewards.router, prefix="/api")
+for router in (
+    analytics,
+    auth_email,
+    communities,
+    community,
+    engagement,
+    rag,
+    research,
+    rewards,
+    uploads,
+):
+    app.include_router(router.router, prefix="/api")
 
 
 @app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def frontend(full_path: str):
+    """Serves the built single-page app; unknown paths get index.html so
+    client-side routes like /explore-communities work on refresh."""
+    if full_path.startswith("api/") or not (FRONTEND_DIST / "index.html").is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    candidate = (FRONTEND_DIST / full_path).resolve()
+    if full_path and candidate.is_file() and candidate.is_relative_to(FRONTEND_DIST):
+        return FileResponse(candidate)
+    return FileResponse(FRONTEND_DIST / "index.html", headers={"Cache-Control": "no-cache"})

@@ -5,9 +5,6 @@ pydantic-settings
 groq
 pypdf
 python-dotenv
-xgboost
-scikit-learn
-shap
-pandas
-numpy
+python-multipart
 slowapi
+httpx

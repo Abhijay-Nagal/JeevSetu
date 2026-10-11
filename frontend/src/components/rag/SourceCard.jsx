@@ -22,7 +22,20 @@ export default function SourceCard({
               </h4>
 
               <p className="mt-1 text-xs text-slate-500">
-                BNHS knowledge source
+                {source.content_type || "BNHS knowledge source"}
+                {source.url && (
+                  <>
+                    {" · "}
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-semibold text-emerald-700 hover:underline"
+                    >
+                      Open record
+                    </a>
+                  </>
+                )}
               </p>
             </div>
 

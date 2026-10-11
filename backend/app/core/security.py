@@ -12,6 +12,7 @@ from typing import Callable
 from fastapi import FastAPI, Request, Response
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -30,7 +31,9 @@ def _key_func(request: Request) -> str:
     return get_remote_address(request)
 
 
-limiter = Limiter(key_func=_key_func, default_limits=["60/minute"])
+limiter = Limiter(
+    key_func=_key_func, default_limits=[f"{get_settings().rate_limit_per_minute}/minute"]
+)
 
 
 def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> Response:
@@ -150,12 +153,10 @@ def setup_security(app: FastAPI) -> None:
 
     Call this from main.py after creating the app instance.
     """
-    settings = get_settings()
-
-    # Update limiter default limits from config
-    limiter._default_limits = [f"{settings.rate_limit_per_minute}/minute"]
-
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+    # Without this middleware slowapi only enforces per-route decorators --
+    # the default per-IP limit above was never actually applied.
+    app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(ThreatLoggingMiddleware)

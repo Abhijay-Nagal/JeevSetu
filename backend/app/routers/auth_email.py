@@ -1,28 +1,80 @@
-from fastapi import APIRouter, Depends, status
-from supabase import Client
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from app.core.auth import CurrentUser, get_current_user
+from app.core.security import limiter
 from app.core.supabase_client import get_supabase
-from app.models.schema import ConfirmEmailRequest, ConfirmEmailResult, SendConfirmationRequest
-from app.services import email_confirmation
+from app.models.schema import (
+    AuthResponse,
+    ConfirmEmailRequest,
+    ConfirmEmailResult,
+    LoginRequest,
+    SignupRequest,
+    UsernameAvailability,
+    UserProfile,
+)
+from app.services import accounts, email_confirmation
 
-# No auth dependency on either route -- the caller has no session yet at
-# this point in the signup flow. The token itself is the credential.
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+@router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
+async def signup(request: Request, body: SignupRequest, supabase=Depends(get_supabase)):
+    result = accounts.signup(supabase, body.username, body.password, body.name, body.email)
+    # Confirmation email is a bonus, not a gate: login works with the
+    # username straight away, and an unconfigured SMTP server shouldn't
+    # stop anyone signing up.
+    if result["user"]["email"] and email_confirmation.smtp_configured():
+        try:
+            token = email_confirmation.create_confirmation(supabase, result["user"]["id"])
+            email_confirmation.send_confirmation_email(
+                result["user"]["email"], result["user"]["name"], token
+            )
+        except Exception:  # noqa: BLE001 -- best effort, logged by the mailer
+            pass
+    return result
+
+
+@router.post("/login", response_model=AuthResponse)
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest, supabase=Depends(get_supabase)):
+    return accounts.login(supabase, body.username, body.password)
+
+
+@router.get("/me", response_model=UserProfile)
+async def me(user: CurrentUser = Depends(get_current_user), supabase=Depends(get_supabase)):
+    return accounts.get_profile(supabase, user.id)
+
+
+@router.get("/username-available", response_model=UsernameAvailability)
+@limiter.limit("60/minute")
+async def username_available(request: Request, username: str, supabase=Depends(get_supabase)):
+    available, reason = accounts.is_username_available(supabase, username)
+    return {
+        "username": accounts.normalize_username(username),
+        "available": available,
+        "reason": reason,
+    }
+
+
 @router.post("/send-confirmation", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit("3/minute")
 async def send_confirmation(
-    body: SendConfirmationRequest,
-    supabase: Client = Depends(get_supabase),
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    supabase=Depends(get_supabase),
 ):
-    token = email_confirmation.create_confirmation(supabase, str(body.user_id))
-    email_confirmation.send_confirmation_email(body.email, body.name, token)
+    # Only ever mails the signed-in user's own address -- the old version
+    # accepted any user_id/email pair from an anonymous caller.
+    if not user.email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Add an email address first"
+        )
+    token = email_confirmation.create_confirmation(supabase, user.id)
+    email_confirmation.send_confirmation_email(user.email, user.name or user.username, token)
     return {"status": "sent"}
 
 
 @router.post("/confirm-email", response_model=ConfirmEmailResult)
-async def confirm_email(
-    body: ConfirmEmailRequest,
-    supabase: Client = Depends(get_supabase),
-):
+async def confirm_email(body: ConfirmEmailRequest, supabase=Depends(get_supabase)):
     return email_confirmation.confirm_token(supabase, body.token)

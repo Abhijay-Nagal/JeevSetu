@@ -1,44 +1,53 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { api } from "../lib/api";
+import { getToken, setToken, SESSION_EXPIRED_EVENT } from "../lib/session";
 
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  // Only "loading" while there's a stored token to check -- with no token
+  // there's nothing to wait for.
+  const [loading, setLoading] = useState(() => Boolean(getToken()));
 
   useEffect(() => {
-    // The email-confirmation/magic-link redirect lands here with the auth
-    // tokens in the URL hash. supabase-js reads them automatically (it
-    // already has, by the time this effect runs), but doesn't clean up the
-    // address bar afterwards -- do that so it doesn't sit on a stray "#".
-    if (window.location.hash.includes("access_token")) {
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data?.session ?? null);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-    });
-
-    return () => listener?.subscription?.unsubscribe();
+    if (!getToken()) return;
+    let cancelled = false;
+    api
+      .me()
+      .then((profile) => !cancelled && setUser(profile))
+      .catch(() => !cancelled && setUser(null))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const value = {
-    session,
-    user: session?.user ?? null,
-    loading,
-    signOut: () => supabase?.auth?.signOut(),
-  };
+  useEffect(() => {
+    const handleExpired = () => setUser(null);
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired);
+  }, []);
+
+  const startSession = useCallback(({ access_token, user: profile }) => {
+    setToken(access_token);
+    setUser(profile);
+    return profile;
+  }, []);
+
+  const login = useCallback(
+    async (username, password) => startSession(await api.login(username, password)),
+    [startSession]
+  );
+
+  const signup = useCallback(async (details) => startSession(await api.signup(details)), [startSession]);
+
+  const signOut = useCallback(() => {
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  const value = { user, loading, login, signup, signOut };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

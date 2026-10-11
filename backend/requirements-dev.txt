@@ -1,6 +1,5 @@
--r requirements.txt
+-r requirements-analytics.txt
 pytest
 pytest-asyncio
-httpx
 ruff
 black

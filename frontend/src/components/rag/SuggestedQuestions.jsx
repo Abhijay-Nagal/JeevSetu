@@ -1,8 +1,8 @@
 const SUGGESTED_QUESTIONS = [
-  "What does BNHS say about bird migration in India?",
-  "What are the major conservation activities carried out by BNHS?",
-  "What role does bird banding play in bird conservation?",
-  "What does BNHS research say about wetlands and migratory birds?",
+  "Why are India's vultures endangered, and what is BNHS doing about it?",
+  "Tell me about the Great Indian Bustard",
+  "Who was Dr. Salim Ali?",
+  "How can I become a BNHS member?",
 ];
 
 export default function SuggestedQuestions({

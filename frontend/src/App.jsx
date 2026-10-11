@@ -56,7 +56,7 @@ const router = createBrowserRouter([
     children: [
       ...appRoutes,
       // Catch-all: redirect any unknown route to home
-      { path: "*", element: <Navigate to="/home" replace /> },
+      { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
   // Catch-all outside the app shell (unauthenticated unknown routes)

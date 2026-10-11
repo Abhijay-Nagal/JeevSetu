@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Loader2 } from "lucide-react";
+import { MessageCircle, Loader2, MapPin } from "lucide-react";
 import { api } from "../../lib/api";
 import { formatRelativeTime } from "../../lib/utils";
 
@@ -64,16 +64,23 @@ export default function PostCard({ post }) {
   return (
     <article className="rounded-xl border border-[#0B3D2E]/10 bg-white p-4">
       <p className="text-xs font-medium text-[#0B3D2E]/50 mb-2">
-        {post.author_name || "Someone"} ·{" "}
+        <span className="font-semibold text-[#0B3D2E]/80">{post.author_name || "Someone"}</span>
+        {post.author_username && <span> @{post.author_username}</span>} ·{" "}
         <time dateTime={post.created_at} title={new Date(post.created_at).toLocaleString()}>
           {formatRelativeTime(post.created_at)}
         </time>
       </p>
       {post.media_url && (
-        <img src={post.media_url} alt="" className="mb-3 max-h-80 w-full rounded-lg object-cover" />
+        <img src={post.media_url} alt={post.species ? `Photo of ${post.species}` : "Observation photo"} loading="lazy" className="mb-3 max-h-80 w-full rounded-lg object-cover" />
       )}
       {post.species && <p className="text-sm font-semibold">{post.species}</p>}
-      {post.description && <p className="mt-1 text-sm">{post.description}</p>}
+      {post.location && (
+        <p className="mt-0.5 flex items-center gap-1 text-xs text-[#0B3D2E]/60">
+          <MapPin size={12} />
+          {post.location}
+        </p>
+      )}
+      {post.description && <p className="mt-1 whitespace-pre-line break-words text-sm">{post.description}</p>}
       <div className="mt-3 flex items-center gap-2 text-sm">
         <button
           onClick={toggleLike}
@@ -90,7 +97,7 @@ export default function PostCard({ post }) {
           className="flex items-center gap-1 rounded-full bg-[#0B3D2E]/5 px-3 py-1 hover:bg-[#0B3D2E]/10"
         >
           <MessageCircle size={14} />
-          {comments === null ? "Comments" : `Comments (${comments.length})`}
+          Comments ({comments === null ? post.comment_count ?? 0 : comments.length})
         </button>
         {post.community_id === null && (
           <span className="rounded-full bg-[#0B3D2E]/5 px-2 py-1 text-xs opacity-70">Global</span>

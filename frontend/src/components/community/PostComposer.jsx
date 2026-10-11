@@ -9,6 +9,8 @@ const MAX_DESCRIPTION = 1000;
 export default function PostComposer({ communitySlug, onPosted }) {
   const { refreshWallet } = useWallet();
   const [description, setDescription] = useState("");
+  const [species, setSpecies] = useState("");
+  const [location, setLocation] = useState("");
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -57,11 +59,15 @@ export default function PostComposer({ communitySlug, onPosted }) {
 
       const post = await api.createPost({
         description: trimmed,
+        species: species.trim() || null,
+        location: location.trim() || null,
         media_url: mediaUrl,
         community_slug: communitySlug,
       });
 
       setDescription("");
+      setSpecies("");
+      setLocation("");
       setFile(null);
       onPosted(post);
       refreshWallet();
@@ -85,6 +91,27 @@ export default function PostComposer({ communitySlug, onPosted }) {
         maxLength={MAX_DESCRIPTION}
         className="w-full resize-none rounded-lg border border-[#0B3D2E]/20 p-3 text-sm outline-none focus:border-[#F4C430]"
       />
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <input
+          type="text"
+          value={species}
+          onChange={(event) => setSpecies(event.target.value)}
+          maxLength={200}
+          placeholder="Species (optional), e.g. Indian Roller"
+          aria-label="Species"
+          className="rounded-lg border border-[#0B3D2E]/20 px-3 py-2 text-sm outline-none focus:border-[#F4C430]"
+        />
+        <input
+          type="text"
+          value={location}
+          onChange={(event) => setLocation(event.target.value)}
+          maxLength={500}
+          placeholder="Location (optional), e.g. Powai Lake"
+          aria-label="Location"
+          className="rounded-lg border border-[#0B3D2E]/20 px-3 py-2 text-sm outline-none focus:border-[#F4C430]"
+        />
+      </div>
 
       {previewUrl && (
         <div className="relative w-fit">

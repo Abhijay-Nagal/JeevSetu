@@ -1,3 +1,4 @@
+import html
 import secrets
 import smtplib
 from datetime import datetime, timedelta, timezone
@@ -5,14 +6,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from fastapi import HTTPException, status
-from supabase import Client
 
 from app.core.config import get_settings
 
 TOKEN_TTL_HOURS = 24
 
 
-def create_confirmation(supabase: Client, user_id: str) -> str:
+def create_confirmation(supabase, user_id: str) -> str:
     token = secrets.token_urlsafe(32)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=TOKEN_TTL_HOURS)
 
@@ -28,9 +28,14 @@ def create_confirmation(supabase: Client, user_id: str) -> str:
     return token
 
 
+def smtp_configured() -> bool:
+    settings = get_settings()
+    return bool(settings.smtp_host and settings.smtp_email and settings.app_password)
+
+
 def send_confirmation_email(to_email: str, name: str, token: str) -> None:
     settings = get_settings()
-    if not settings.smtp_host or not settings.smtp_email or not settings.app_password:
+    if not smtp_configured():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="SMTP is not configured -- set SMTP_EMAIL/APP_PASSWORD in .env",
@@ -54,7 +59,7 @@ def send_confirmation_email(to_email: str, name: str, token: str) -> None:
         server.send_message(message)
 
 
-def confirm_token(supabase: Client, token: str) -> dict:
+def confirm_token(supabase, token: str) -> dict:
     result = (
         supabase.table("email_confirmations").select("*").eq("token", token).limit(1).execute()
     )
@@ -70,14 +75,17 @@ def confirm_token(supabase: Client, token: str) -> dict:
     if datetime.now(timezone.utc) > expires_at:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This confirmation link has expired -- sign up again to get a new one",
+            detail="This confirmation link has expired -- request a new one from your account",
         )
 
-    supabase.auth.admin.update_user_by_id(confirmation["user_id"], {"email_confirm": True})
+    confirmed_at = datetime.now(timezone.utc).isoformat()
+    supabase.table("users").update({"email_confirmed_at": confirmed_at}).eq(
+        "id", confirmation["user_id"]
+    ).execute()
 
-    supabase.table("email_confirmations").update(
-        {"confirmed_at": datetime.now(timezone.utc).isoformat()}
-    ).eq("token", token).execute()
+    supabase.table("email_confirmations").update({"confirmed_at": confirmed_at}).eq(
+        "token", token
+    ).execute()
 
     return {"already_confirmed": False}
 
@@ -93,6 +101,7 @@ def _plain_text(name: str, confirm_url: str) -> str:
 
 
 def _html(name: str, confirm_url: str) -> str:
+    name, confirm_url = html.escape(name), html.escape(confirm_url)
     return f"""\
 <!DOCTYPE html>
 <html>

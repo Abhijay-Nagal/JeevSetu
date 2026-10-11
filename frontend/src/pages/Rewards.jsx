@@ -4,7 +4,6 @@ import { Coins, ArrowUpRight, ArrowDownRight, Flame, Snowflake, CheckCircle2, XC
 import { api } from "../lib/api"
 import { useWallet } from "../context/WalletContext"
 import { formatRelativeTime } from "../lib/utils"
-import { myCards } from "../data/cards"
 
 export const route = { path: "/rewards", layout: "app" }
 
@@ -17,6 +16,8 @@ const REASON_LABELS = {
   post_liked: "Your post was liked",
   community_joined: "Joined a community",
   community_created: "Created a community",
+  welcome_bonus: "Welcome bonus",
+  card_collected: "Collected a card",
 }
 
 function StreakBadges({ streak }) {
@@ -142,6 +143,14 @@ function DailyQuestionCard({ onAnswered }) {
 function Rewards() {
   const { wallet, refreshWallet } = useWallet()
   const navigate = useNavigate()
+  const [cardCount, setCardCount] = useState(null)
+
+  useEffect(() => {
+    api
+      .getCards()
+      .then((data) => setCardCount(data.cards.filter((card) => card.owned).length))
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="max-w-2xl">
@@ -152,7 +161,7 @@ function Rewards() {
       </p>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button className="flex items-center gap-4 rounded-2xl bg-[#0B3D2E] text-[#F8F6E9] px-6 py-6 transition hover:bg-[#0B3D2E]/90 hover:-translate-y-1 hover:shadow-md">
+        <div className="flex items-center gap-4 rounded-2xl bg-[#0B3D2E] text-[#F8F6E9] px-6 py-6">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#F4C430] text-[#0B3D2E]">
             <Coins size={26} />
           </div>
@@ -162,7 +171,7 @@ function Rewards() {
               {wallet ? wallet.coin_balance.toLocaleString() : "..."}
             </p>
           </div>
-        </button>
+        </div>
 
         <button 
           onClick={() => navigate("/cards")}
@@ -174,7 +183,7 @@ function Rewards() {
           <div className="text-left flex-1">
             <p className="text-sm font-semibold text-[#0B3D2E]/60 uppercase tracking-wider">My Cards</p>
             <p className="text-3xl font-bold">
-              {myCards.length}
+              {cardCount ?? "..."}
             </p>
           </div>
         </button>

@@ -25,3 +25,10 @@ frontend/public/Antigravity-x64.exe
 # Frontend
 node_modules
 dist
+
+# Local data store, uploads and auth secret (backend DATA_DIR)
+backend/.data/
+
+# Server credentials -- never commit
+Team-25.zip
+*.zip

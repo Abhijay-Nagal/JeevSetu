@@ -81,7 +81,7 @@ export default function Home() {
   }, []);
 
   if (loading) return null;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to="/" replace />;
 
   const next = (e) => { e.preventDefault(); bookRef.current?.pageFlip()?.flipNext(); };
 

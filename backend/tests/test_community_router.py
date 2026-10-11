@@ -30,7 +30,7 @@ def test_post_observations_returns_created_row():
     client, _, user_id = _client_as("contributor")
 
     response = client.post(
-        "/observations", json={"species": "Cheetah", "description": "Near the ridge"}
+        "/api/observations", json={"species": "Cheetah", "description": "Near the ridge"}
     )
 
     assert response.status_code == 201
@@ -45,9 +45,9 @@ def test_get_observations_mine_returns_only_own_rows():
     fake_supabase.table("observations").insert(
         {"species": "Gaur", "user_id": str(uuid.uuid4())}
     ).execute()
-    client.post("/observations", json={"species": "Cheetah"})
+    client.post("/api/observations", json={"species": "Cheetah"})
 
-    response = client.get("/observations/mine")
+    response = client.get("/api/observations/mine")
 
     assert response.status_code == 200
     assert [row["species"] for row in response.json()] == ["Cheetah"]
@@ -60,7 +60,7 @@ def test_get_observations_returns_all_rows_for_staff():
         {"species": "Cheetah", "user_id": str(uuid.uuid4())}
     ).execute()
 
-    response = client.get("/observations")
+    response = client.get("/api/observations")
 
     assert response.status_code == 200
     assert len(response.json()) == 2
@@ -76,7 +76,7 @@ def test_patch_observation_updates_status_and_logs_event():
     )
 
     response = client.patch(
-        f"/observations/{created['id']}",
+        f"/api/observations/{created['id']}",
         json={"status": "under_review", "note": "Looks promising"},
     )
 
@@ -96,10 +96,10 @@ def test_like_and_unlike_observation():
         .data[0]
     )
 
-    like_response = client.post(f"/observations/{created['id']}/like")
+    like_response = client.post(f"/api/observations/{created['id']}/like")
     assert like_response.status_code == 200
     assert like_response.json()["like_count"] == 1
 
-    unlike_response = client.delete(f"/observations/{created['id']}/like")
+    unlike_response = client.delete(f"/api/observations/{created['id']}/like")
     assert unlike_response.status_code == 200
     assert unlike_response.json()["like_count"] == 0

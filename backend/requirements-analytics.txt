@@ -1,0 +1,7 @@
+# Optional: only the staff engagement-analytics endpoints need these.
+-r requirements.txt
+xgboost
+scikit-learn
+shap
+pandas
+numpy

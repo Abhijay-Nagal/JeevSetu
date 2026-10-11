@@ -335,7 +335,7 @@ export default function HomeFeed() {
                 <div className="bg-white/10 p-4 rounded-xl border border-white/5 mt-auto relative z-50 shrink-0">
                   <h3 className="font-bold text-sm mb-1 text-[#F4C430]">My Submissions</h3>
                   <p className="text-xs opacity-80 leading-relaxed mb-3">Keep track of the observations, reports and contributions you've made through JeevSetu.</p>
-                  <Link to="/my-submissions" className="text-xs font-bold hover:underline flex items-center text-[#F4C430] w-fit">View My Submissions <ArrowRight size={12} className="ml-1" /></Link>
+                  <Link to="/submissions" className="text-xs font-bold hover:underline flex items-center text-[#F4C430] w-fit">View My Submissions <ArrowRight size={12} className="ml-1" /></Link>
                 </div>
               </div>
             </div>

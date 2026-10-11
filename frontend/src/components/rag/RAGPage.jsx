@@ -15,12 +15,15 @@ import {
   ExternalLink,
   User,
   FileText,
+  MessagesSquare,
 } from "lucide-react";
+import RAGChat from "./RAGChat";
 import { api } from "../../lib/api";
 import ShinyText from "../ui/ShinyText";
 import SpotlightCard from "../ui/SpotlightCard";
 
 const TABS = [
+  { key: "ask", label: "Ask BNHS", icon: MessagesSquare, placeholder: "" },
   { key: "search", label: "Content Search", icon: Search, placeholder: "Search: 'vulture conservation', 'birds in wetlands'..." },
   { key: "next-steps", label: "Explore", icon: Compass, placeholder: "Enter a topic to explore..." },
   { key: "quiz", label: "Quiz", icon: Brain, placeholder: "Enter a topic to generate a quiz..." },
@@ -35,7 +38,7 @@ const ACTION_ICONS = {
 };
 
 export default function RAGPage() {
-  const [activeTab, setActiveTab] = useState("search");
+  const [activeTab, setActiveTab] = useState("ask");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
@@ -105,6 +108,10 @@ export default function RAGPage() {
 
       {/* Main Content Area */}
       <div className="p-4 sm:p-8">
+          {activeTab === "ask" ? (
+            <RAGChat embedded />
+          ) : (
+          <>
 
           <form onSubmit={handleSearch} className="mb-6 flex flex-col sm:flex-row gap-3">
             <input
@@ -200,7 +207,8 @@ export default function RAGPage() {
                       <SpotlightCard key={idx} className="p-0 border-none bg-transparent hover:translate-y-0 shadow-none hover:shadow-none group h-full">
                         <a
                           href={action.direct_link || "#"}
-                          target="_blank"
+                          // In-app links (e.g. /explore-communities) stay in this tab.
+                          target={action.direct_link?.startsWith("/") ? undefined : "_blank"}
                           rel="noreferrer"
                           className="flex items-center p-5 rounded-xl border border-[#0B3D2E]/10 group-hover:border-[#0B3D2E]/20 transition-colors bg-white h-full"
                         >
@@ -271,6 +279,8 @@ export default function RAGPage() {
               </div>
             )}
           </div>
+          </>
+          )}
 
       </div>
     </div>
