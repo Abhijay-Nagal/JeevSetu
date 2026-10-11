@@ -79,7 +79,7 @@ def signup(supabase, username: str, name: str, email: str | None) -> dict:
     rewards.award_coins(supabase, user["id"], rewards.COINS_WELCOME_BONUS, "welcome_bonus")
     user["coin_balance"] = rewards.COINS_WELCOME_BONUS
 
-    return {"access_token": create_access_token(user["id"]), "user": public_profile(user)}
+    return {"access_token": create_access_token(user["id"], user["username"], user.get("name")), "user": public_profile(user)}
 
 
 def login(supabase, username: str) -> dict:
@@ -89,7 +89,7 @@ def login(supabase, username: str) -> dict:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No account with that username -- check the spelling or sign up",
         )
-    return {"access_token": create_access_token(user["id"]), "user": public_profile(user)}
+    return {"access_token": create_access_token(user["id"], user["username"], user.get("name")), "user": public_profile(user)}
 
 
 def get_profile(supabase, user_id: str) -> dict:

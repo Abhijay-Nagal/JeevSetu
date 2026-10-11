@@ -98,3 +98,26 @@ def test_username_availability(client):
 def test_protected_routes_reject_anonymous_requests(client):
     assert client.get("/api/rewards/wallet").status_code == 401
     assert client.post("/api/observations", json={"species": "Tiger"}).status_code == 401
+
+
+def test_lost_account_is_restored_from_a_valid_token(client, store):
+    token = _signup(client).json()["access_token"]
+    # Simulate a fresh serverless instance whose store never saw this user.
+    user_id = store.table("users").select("id").eq("username", "asha_k").execute().data[0]["id"]
+    store.table("users").delete().eq("id", user_id).execute()
+
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+
+    assert me.status_code == 200
+    assert me.json()["id"] == user_id
+    assert me.json()["username"] == "asha_k"
+    assert me.json()["name"] == "Asha K"
+
+
+def test_tampered_token_is_not_restored(client, store):
+    token = _signup(client).json()["access_token"]
+    store.table("users").delete().eq("username", "asha_k").execute()
+
+    forged = token[:-2] + ("AA" if not token.endswith("AA") else "BB")
+
+    assert client.get("/api/auth/me", headers={"Authorization": f"Bearer {forged}"}).status_code == 401

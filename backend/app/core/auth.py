@@ -12,6 +12,7 @@ import base64
 import hashlib
 import hmac
 import json
+import os
 import secrets
 import time
 from functools import lru_cache
@@ -59,6 +60,12 @@ def _signing_key() -> bytes:
         for material in (settings.supabase_service_role_key, settings.groq_api_key):
             if material:
                 return hmac.new(material.encode(), b"jeevsetu-auth", hashlib.sha256).digest()
+        # Last resort: the project id is stable across instances but not
+        # secret. With username-only login a forged token grants nothing a
+        # plain login wouldn't, but set AUTH_SECRET for a proper key.
+        project = os.environ.get("VERCEL_PROJECT_ID") or os.environ.get("VERCEL_GIT_REPO_ID")
+        if project:
+            return hashlib.sha256(f"jeevsetu-auth:{project}".encode()).digest()
 
     # No secret configured: generate one once and keep it next to the data,
     # so tokens survive restarts.
@@ -79,15 +86,29 @@ def _unb64(text: str) -> bytes:
     return base64.urlsafe_b64decode(text + "=" * (-len(text) % 4))
 
 
-def create_access_token(user_id: str) -> str:
+def create_access_token(user_id: str, username: str | None = None, name: str | None = None) -> str:
+    # The username and display name ride along in the (signed) token so an
+    # instance that has never seen this account -- a fresh serverless
+    # instance with an empty /tmp store -- can restore it instead of
+    # logging the person out.
     ttl = get_settings().auth_token_ttl_hours * 3600
-    payload = _b64(json.dumps({"sub": user_id, "exp": int(time.time()) + ttl}).encode())
+    claims = {"sub": user_id, "exp": int(time.time()) + ttl}
+    if username:
+        claims["usr"] = username
+        claims["name"] = name
+    payload = _b64(json.dumps(claims).encode())
     signature = _b64(hmac.new(_signing_key(), payload.encode(), hashlib.sha256).digest())
     return f"{payload}.{signature}"
 
 
 def decode_access_token(token: str) -> str | None:
     """Returns the user id for a valid, unexpired token, else None."""
+    claims = decode_claims(token)
+    return claims.get("sub") if claims else None
+
+
+def decode_claims(token: str) -> dict | None:
+    """Returns the claims of a valid, unexpired token, else None."""
     try:
         payload, signature = token.split(".")
         expected = _b64(hmac.new(_signing_key(), payload.encode(), hashlib.sha256).digest())
@@ -98,7 +119,7 @@ def decode_access_token(token: str) -> str | None:
         return None
     if claims.get("exp", 0) < time.time():
         return None
-    return claims.get("sub")
+    return claims
 
 
 # ---------------------------------------------------------------------------
@@ -132,8 +153,35 @@ async def get_optional_user(
 ) -> CurrentUser | None:
     if credentials is None:
         return None
-    user_id = decode_access_token(credentials.credentials)
-    return load_user(supabase, user_id) if user_id else None
+    claims = decode_claims(credentials.credentials)
+    if not claims or not claims.get("sub"):
+        return None
+    return load_user(supabase, claims["sub"]) or _restore_user(supabase, claims)
+
+
+def _restore_user(supabase, claims: dict) -> CurrentUser | None:
+    """Recreates the profile row for a validly signed token whose account
+    this data store has lost (serverless /tmp storage is wiped on cold
+    starts). Activity history isn't recoverable, but the person stays
+    signed in under the same id and username."""
+    username = claims.get("usr")
+    if not username:
+        return None
+    taken = supabase.table("users").select("id").eq("username", username).limit(1).execute()
+    if taken.data:
+        # Someone else registered this username on this instance meanwhile.
+        return None
+    supabase.table("users").insert(
+        {
+            "id": claims["sub"],
+            "username": username,
+            "name": claims.get("name") or username,
+            "email": None,
+            "role": "contributor",
+            "coin_balance": 0,
+        }
+    ).execute()
+    return load_user(supabase, claims["sub"])
 
 
 async def get_current_user(
